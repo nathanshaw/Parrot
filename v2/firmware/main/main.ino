@@ -98,7 +98,11 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  testPeckerModule();
+}
+
+void serialCtrl() {
+    // put your main code here, to run repeatedly:
   if (Serial.available() > 0) {
     int incByte = Serial.read() - 48;
     if (incByte > -1 && incByte < 4) {
@@ -215,4 +219,13 @@ void errorDecoder(SHTC3_Status_TypeDef message)                             // T
     case SHTC3_Status_CRC_Fail : Serial.print("CRC Fail"); break;
     default : Serial.print("Unknown return code"); break;
   }
+}
+
+void testPeckerModule() {
+  // test the H-Bridge and the solenoid peckers
+  Serial.println("TESTING PECKER");
+  digitalWrite(s_pins[0], HIGH);
+  delay(50);
+  digitalWrite(s_pins[0], LOW);
+  delay(250);
 }
