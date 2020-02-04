@@ -10,7 +10,7 @@
 
 #define LED_PIN 13
 uint8_t mot_dir = 20;
-uint8_t mot_pwm = 15;
+uint8_t mot_pwm = 22; // 15 in the pcb, but 15 is not a teensy 3.2 PWM pin =(
 uint8_t mot_en = 21;  
 DualMAX14870MotorShield motors(mot_dir, mot_pwm, 31, 32, mot_en, 33);
 
@@ -79,43 +79,11 @@ void loop()
     stopIfFault();
     delay(1);
   }
-  /*
+
   // run M2 motor with positive speed
 
   digitalWrite(LED_PIN, HIGH);
 
-  for (int speed = 0; speed <= 400; speed++)
-  {
-    motors.setM2Speed(speed);
-    stopIfFault();
-    delay(2);
-  }
-
-  for (int speed = 400; speed >= 0; speed--)
-  {
-    motors.setM2Speed(speed);
-    stopIfFault();
-    delay(2);
-  }
-
-  // run M2 motor with negative speed
-
-  digitalWrite(LED_PIN, LOW);
-
-  for (int speed = 0; speed >= -400; speed--)
-  {
-    motors.setM2Speed(speed);
-    stopIfFault();
-    delay(2);
-  }
-
-  for (int speed = -400; speed <= 0; speed++)
-  {
-    motors.setM2Speed(speed);
-    stopIfFault();
-    delay(2);
-  }
-  */
   motors.disableDrivers();
   delay(500);
 }
