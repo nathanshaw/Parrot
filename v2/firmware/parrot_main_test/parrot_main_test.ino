@@ -32,7 +32,7 @@
 #define TEST_TEMP_HUMIDITY 0
 #define TEST_LDRS 0
 
-#define PRINT_AUDIO_FEATURES 1
+#define PRINT_PEAK_VALS 1
 
 // what actuators configurations are present?
 #define WOOD_PECKER
@@ -321,32 +321,7 @@ double peak_val = 0.0;
 double last_peak = 0.0;
 
 FFTManager1024 fft_features = FFTManager1024("Input FFT");
-
-void gatherAudioFeatures() {
-  // this function will collect and store all the available audio features
-  if (peak.available()) {
-    last_peak = peak_val;
-    peak_val = peak.read();
-    // Serial.print("p - ");
-    // Serial.print(peak_val, 6);
-  }
-  // rms
-  /*
-  if (rms.available()) {
-    last_rms = rms_val;
-    rms_val = (double)rms.read() * 10000.0;
-    Serial.print("\trms - ");
-    Serial.println(rms_val, 6);
-  }
-  */
-  // FFT
-  /*
-  if (fft.available()) {
-     Serial.println("FFT IS AVAILABLE");
-  }
-  */
-  // Serial.println();
-}
+FeatureCollector fc = FeatureCollector("ALL");
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Status LED and Pot Pin ///////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -470,6 +445,8 @@ void setup() {
   fft_features.setCentroidActive(true);
   fft_features.setFluxActive(true);
   fft_features.setFFTScaler(100);
+
+  fc.linkPeak(&peak, 1000.0, PRINT_PEAK_VALS);
   
   Serial.println("Finished setup Loop");
   delay(8000);
@@ -483,7 +460,7 @@ void updateAll() {
   updateTempHumidity();
   updateSolenoids(); // turns off all solenoids which have been activated using triggerSolenoid
   updateHBridge();   //
-  gatherAudioFeatures();
+  fc.update();
   runtimeTests();
   updateFeedbackLEDs();
 }

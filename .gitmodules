@@ -1,0 +1,6 @@
+[submodule "v2/firmware/parrot_main_test/AudioEngine"]
+	path = v2/firmware/parrot_main_test/AudioEngine
+	url = https://github.com/nathanshaw/AudioEngine
+[submodule "v2/firmware/parrot_main_test/NeopixelManager"]
+	path = v2/firmware/parrot_main_test/NeopixelManager
+	url = https://github.com/nathanshaw/NeopixelManager
