@@ -4,6 +4,9 @@
 */
 #include "SHTSensor.h"
 #include <DualMAX14870MotorShield.h>
+#include "NeopixelManager/NeopixelManager.h"
+#include "AudioEngine/AudioEngine.h"
+#include "AudioEngine/FFTManager1024.h"
 #include <WS2812Serial.h>
 #include "Configuration.h"
 // audio libraries
@@ -43,9 +46,6 @@
 #define DATALOG 1
 #define PRINT_EEPROM_ON_BOOT 1
 
-elapsedMillis wb_trigger;
-elapsedMillis sol_triggers [6];
-unsigned long sol_delays[6] = {200, 1000, 400, 500, 600, 700}; // amount of time inbetween washboard pecker solenoid actuations
 
 //////////////////////////////////////////////////////////////////////////
 ///////////////////  Debug Printing  /////////////////////////////////////
@@ -94,7 +94,7 @@ void testSolenoids(unsigned int len) {
   Serial.println("--------------------------");
 };
 //////////////////////////////////////////////////////////////////////////
-////////////////////// NeoPixels /////////////////////////////////////////
+/////////////////////////  NeoPixels /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 const uint16_t max_led_count = max(max(LED1_COUNT, LED2_COUNT), LED3_COUNT);
@@ -106,16 +106,13 @@ WS2812Serial leds[3] = {WS2812Serial(LED1_COUNT, displayMemory[0], drawingMemory
                         WS2812Serial(LED2_COUNT, displayMemory[1], drawingMemory[1], LED2_PIN, WS2812_GRB), 
                         WS2812Serial(LED3_COUNT, displayMemory[2], drawingMemory[2], LED3_PIN, WS2812_GRB)};
 
-#define BLACK  0x000000
-#define RED    0x160000
-#define GREEN  0x001600
-// changed fro 16 to 46
-#define BLUE   0x000046
-#define PURPLE 0x160046
-#define YELLOW 0x101400
-#define PINK   0x120009
-#define ORANGE 0x100400
-#define WHITE  0x101010
+NeoGroup neos[3] = {
+  NeoGroup(&leds[0], 0, LED1_COUNT, "small"),
+  NeoGroup(&leds[1], 0, LED2_COUNT, "medium"),
+  NeoGroup(&leds[1], 0, LED3_COUNT, "large")
+};
+
+#define MAX_BRIGHTNESS        255
 
 //////////////////////////////////////////////////////////////////////////
 ///////////////////// H-Bridge Motor Driver //////////////////////////////
@@ -307,88 +304,55 @@ void calibrateTempHumidity(uint32_t delay_time) {
 //////////////////////////////////////////////////////////////////////////
 ////////////////// Audio /////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-
-AudioInputI2S            i2s;            //xy=634,246
-AudioAmplifier           amp1;           //xy=777.1429023742676,277.14284896850586
-AudioAmplifier           input_amp;      //xy=788,240
-AudioFilterBiquad        biquad;         //xy=951.4286575317383,241.42859840393066
-AudioFilterBiquad        biquad1;        //xy=952.8571243286133,275.71428298950195
-AudioAnalyzeRMS          rms;            //xy=1135.4286575317383,322.42859840393066
-AudioAnalyzeToneDetect   tone_detect;    //xy=1139.4286575317383,226.42859840393066
-AudioAnalyzePeak         peak;           //xy=1139.4286575317383,258.42859840393066
-AudioAnalyzeFFT1024      fft1024;        //xy=1145.4286575317383,290.42859840393066
-AudioOutputUSB           usb_output;     //xy=1147.4286575317383,194.42859840393066
-AudioAnalyzeNoteFrequency note_freq;      //xy=1149.4286575317383,354.42859840393066
-AudioConnection          patchCord1(i2s, 0, input_amp, 0);
-AudioConnection          patchCord2(i2s, 1, amp1, 0);
-AudioConnection          patchCord3(amp1, biquad1);
-AudioConnection          patchCord4(input_amp, biquad);
-AudioConnection          patchCord5(biquad, tone_detect);
-AudioConnection          patchCord6(biquad, peak);
-AudioConnection          patchCord7(biquad, fft1024);
-AudioConnection          patchCord8(biquad, rms);
-AudioConnection          patchCord9(biquad, note_freq);
-AudioConnection          patchCord10(biquad, 0, usb_output, 0);
-AudioConnection          patchCord11(biquad1, 0, usb_output, 1);
+AudioInputI2S            i2s;              //xy=634,246
+AudioAmplifier           input_amp;      //xy=777.1429023742676,277.14284896850586
+AudioFilterBiquad        biquad;
+AudioAnalyzePeak         peak;             //xy=1139.4286575317383,258.42859840393066
+AudioAnalyzeFFT1024      fft;           //xy=1145.4286575317383,290.42859840393066
+AudioOutputUSB           usb_output;       //xy=1147.4286575317383,194.42859840393066
+AudioConnection          patchCord1(i2s, 0, biquad, 0);
+AudioConnection          patchCord2(biquad, input_amp);
+AudioConnection          patchCord6(input_amp, peak);
+AudioConnection          patchCord7(input_amp, fft);
+AudioConnection          patchCord10(input_amp, 0, usb_output, 0);
+AudioConnection          patchCord11(input_amp, 0, usb_output, 1);
 
 double peak_val = 0.0;
 double last_peak = 0.0;
 
-double rms_val;
-double last_rms;
-
-double tone_val;
-double last_tone;
-
-double freq_val;
-double last_freq;
-
-double freq_prob;
-double last_freq_prob; // not sure I need this...
-
-int fft_bin_max; //  the bin number which contains the most energy...
+FFTManager1024 fft_features = FFTManager1024("Input FFT");
 
 void gatherAudioFeatures() {
   // this function will collect and store all the available audio features
   if (peak.available()) {
     last_peak = peak_val;
-    peak_val = peak.read() * 10000.0;
-    Serial.print("p - ");
-    Serial.print(peak_val, 6);
+    peak_val = peak.read();
+    // Serial.print("p - ");
+    // Serial.print(peak_val, 6);
   }
   // rms
+  /*
   if (rms.available()) {
     last_rms = rms_val;
     rms_val = (double)rms.read() * 10000.0;
     Serial.print("\trms - ");
     Serial.println(rms_val, 6);
   }
-  // tone detect
-  if (tone_detect.available()) {
-    last_tone = tone_val;
-    tone_val = tone_detect.read();
-    Serial.print("tone - ");
-    Serial.println(tone_val);
-  }
-  // frequency
-  if (note_freq.available()) {
-    last_freq = freq_val;
-    freq_val = note_freq.read();
-    last_freq_prob = freq_prob;
-    freq_prob = note_freq.probability();
-    Serial.print("freq - ");
-    Serial.print(freq_val);
-    Serial.print(" freq prob: ");
-    Serial.println(freq_prob);
-  }
+  */
   // FFT
-  /* TODO
-    if (fft.available()) {
-
-    }
+  /*
+  if (fft.available()) {
+     Serial.println("FFT IS AVAILABLE");
+  }
   */
   // Serial.println();
 }
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Status LED and Pot Pin ///////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+#define LED_PIN         17
+#define POT_PIN         14
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Rhythm detection stuff ///////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -423,14 +387,7 @@ void detectOnset() {
   }
 */
 
-void printAudioFeatures() {
-  Serial.print("peak: "); Serial.print(peak_val);
-  Serial.print("\trms: "); Serial.print(rms_val);
-  Serial.print("\ttone: "); Serial.print(tone_val);
-  Serial.println();
-}
-
-#define AUDIO_MEMORY 24
+#define AUDIO_MEMORY 60
 
 elapsedMillis last_audio_usage_print;
 #define AUDIO_USAGE_POLL_RATE 5000
@@ -486,7 +443,7 @@ void setup() {
   leds[1].begin();
   leds[2].begin();
 
-  ///////////////////// temp and humidity sensor
+  ///////////////////// temp and humidity sensor // 
   Wire.begin();
   if (sht.init()) {
     Serial.print("init(): success\n");
@@ -502,44 +459,21 @@ void setup() {
   uint32_t lpf = 14000;
   uint32_t hpf = 200;
   double q = 0.8;
-  input_amp.gain(1.5);
+  input_amp.gain(30.0);
+
   biquad.setLowpass(0, lpf, q);
   biquad.setLowpass(1, lpf, q);
   biquad.setHighpass(2, hpf, q);
   biquad.setHighpass(3, hpf, q);
+
+  fft_features.linkFFT(&fft);
+  fft_features.setCentroidActive(true);
+  fft_features.setFluxActive(true);
+  fft_features.setFFTScaler(100);
   
   Serial.println("Finished setup Loop");
   delay(8000);
   Serial.println("-----------------------------------");
-}
-
-void testNeoStrips(unsigned int len) {
-  // todo write this properly without hard coded loop values
-  
-  Serial.print("Testing NEOP Strips: ");
-  Serial.print("1r");
-  colorWipe(leds[0], RED, len / 9);
-  Serial.print("2r ");
-  colorWipe(leds[1], RED, len / 9);
-  Serial.print("3r ");
-  colorWipe(leds[2], RED, len / 9);
-  Serial.print("1o ");
-  colorWipe(leds[0], ORANGE, len / 9);
-  Serial.print("2o ");
-  colorWipe(leds[1], ORANGE, len / 9);
-  Serial.print("3o ");
-  colorWipe(leds[2], ORANGE, len / 9);
-  Serial.print("1p ");
-  colorWipe(leds[0], PURPLE, len / 9);
-  Serial.print("2p ");
-  colorWipe(leds[1], PURPLE, len / 9);
-  Serial.print("3p ");
-  colorWipe(leds[2], PURPLE, len / 9);
-  
-  colorWipe(leds[0], BLACK, 0);
-  colorWipe(leds[1], BLACK, 0);
-  colorWipe(leds[2], BLACK, 0);
-  Serial.println("\nFinished testing NeoPixel Strips");
 }
 
 void updateAll() {
@@ -550,21 +484,17 @@ void updateAll() {
   updateSolenoids(); // turns off all solenoids which have been activated using triggerSolenoid
   updateHBridge();   //
   gatherAudioFeatures();
-  if (PRINT_AUDIO_FEATURES) {
-    printAudioFeatures();
-  }
+  runtimeTests();
+  updateFeedbackLEDs();
+}
+
+void runtimeTests() {
   if (TEST_MOTOR) {
     testMotor(5000);
   }
   if (TEST_SOLENOIDS) {
     testSolenoids(2000);
   }
-  if (TEST_NEOP) {
-    testNeoStrips(2000);
-  } 
-  if (TEST_MICS) {
-    Serial.println("TODO");
-  } 
   if (TEST_TEMP_HUMIDITY) {
     testTempHumidity(500);
   }
@@ -573,41 +503,154 @@ void updateAll() {
   }
 }
 
-void colorWipe(WS2812Serial &l, int color, int wait) {
-  for (int i = 0; i < l.numPixels(); i++) {
-    l.setPixel(i, color);
-    l.show();
-    delayMicroseconds(wait);
+//////////////////////////////// Global Variables /////////////////////////
+double color_feature_min = 1.00;
+double color_feature_max = 0.0;
+
+elapsedMillis feature_reset_tmr;
+elapsedMillis last_led_update_tmr;
+const unsigned long led_refresh_rate = 33; // for 30 updates a second
+const unsigned long feature_reset_time = (1000 * 2.5);// every 2.5 minute?
+
+double brightness_feature_min = 1.0;
+double brightness_feature_max = 0.0;
+
+double current_brightness = 1.0;
+double last_brightness = 1.0;
+
+double current_color = 0.5;
+double last_color = 0.5;
+
+double last_feature;
+double current_feature;
+
+// for mapping the target color to real colors
+#define RED_LOW                 0
+#define RED_HIGH                50
+
+#define GREEN_LOW               150
+#define GREEN_HIGH              50
+
+#define BLUE_LOW                55
+#define BLUE_HIGH               255
+
+#define NUM_NEOP_MANAGERS      3
+
+double calculateFeedbackColor() {
+    /* Should return a number between 0.0 and 1.0 */
+  double cent = fft_features.getCentroid();       // right now we are only polling the first FC for its centroid to use to color both sides
+  if (cent < color_feature_min) {
+    color_feature_min = (color_feature_min * 0.94) + (cent * 0.06);
+    cent = color_feature_min;
   }
+  if (cent > color_feature_max) {
+    color_feature_max = (color_feature_max * 0.94) + (cent * 0.06);
+    cent = color_feature_max;
+  }
+  cent = (cent - color_feature_min) / (color_feature_max - color_feature_min);
+  return cent;
+}
+
+#define PRINT_BRIGHTNESS 1
+#define PRINT_COLOR      1
+
+double calculateFeedbackBrightness() {
+     // how much energy is stored in the range of 4000 - 16000 compared to  the entire spectrum?
+  double target_brightness = fft_features.getFFTRangeByFreq(100, 16000);
+  if (target_brightness < 0.01) {
+    target_brightness = 0.0;
+  } else if (target_brightness > 1.0) {
+    target_brightness = 1.0;
+  }
+  if (target_brightness < brightness_feature_min) {
+    if (PRINT_BRIGHTNESS) {
+      Serial.print("target_B is less than feature_min: ");
+      Serial.print(target_brightness, 5);
+      Serial.print(" < ");
+      Serial.print(brightness_feature_min, 5);
+    }
+    brightness_feature_min = (target_brightness * 0.15) + (brightness_feature_min * 0.85);
+    if (PRINT_BRIGHTNESS) {
+      Serial.print(" updated brightness_min and target_brightness to: ");
+      Serial.println(brightness_feature_min, 5);
+    }
+    target_brightness = brightness_feature_min;
+  }
+  if (target_brightness > brightness_feature_max) {
+
+    if (PRINT_BRIGHTNESS) {
+      Serial.print("target_B is more than feature_max: ");
+      Serial.print(target_brightness, 5);
+      Serial.print(" > ");
+      Serial.print(brightness_feature_max, 5);
+    }
+    brightness_feature_max = (target_brightness * 0.15) + (brightness_feature_max * 0.85);
+    // to ensure that loud clipping events do not skew things too much
+    if (brightness_feature_max > 1.0) {
+      brightness_feature_max = 1.0;
+    }
+    if (PRINT_BRIGHTNESS) {
+      Serial.print(" updated brightness_max and target_brightness to: ");
+      Serial.println(brightness_feature_max, 5);
+    }
+    target_brightness = brightness_feature_max;
+  }
+  dprintln(PRINT_BRIGHTNESS);
+  dprint(PRINT_BRIGHTNESS, " target - min/max ");
+  dprint(PRINT_BRIGHTNESS, target_brightness);
+  dprint(PRINT_BRIGHTNESS, " - ");
+  dprint(PRINT_BRIGHTNESS, brightness_feature_min);
+  dprint(PRINT_BRIGHTNESS, " / ");
+  dprintln(PRINT_BRIGHTNESS, brightness_feature_max);
+
+  target_brightness = (target_brightness - brightness_feature_min) / (brightness_feature_max - brightness_feature_min);
+  dprint(PRINT_BRIGHTNESS, "target_brightness(2): ");
+  dprint(PRINT_BRIGHTNESS, target_brightness);
+  dprint(PRINT_BRIGHTNESS, " ");
+
+  return target_brightness;
+}
+
+void updateFeedbackLEDs() {
+    // the brightness of the LEDs should mirror the peak gathered from the environment
+    // a local min/max which scales periodically should be implemented just like with the Moth
+    // a MAX_RMS brightness should be used to determine what the max brightness of the feedback is
+    // the LEDs should be updated 30x a second
+
+    // calculate the target color ///////////////////////////////////////
+    if (last_led_update_tmr > led_refresh_rate) {
+        double target_color = 0.0;
+        double target_brightness = 0.0;
+        uint8_t red, green, blue;
+
+        target_color = calculateFeedbackColor();
+        dprint(PRINT_COLOR, "target color: ");
+        dprintln(PRINT_COLOR, target_color);
+        last_color = current_color;
+        current_color = (target_color * 0.2) + (last_color * 0.8);// * COLOR_LP_LEVEL);
+
+        // calculate the preliminary rgb values /////////////////////////////
+        red = ((1.0 - current_color) * RED_LOW) + (current_color * RED_HIGH);
+        green = ((1.0 - current_color) * GREEN_LOW) + (current_color * GREEN_HIGH);
+        blue = ((1.0 - current_color) * BLUE_LOW) + (current_color * BLUE_HIGH);
+
+        // calculate the target brightness ///////////////////////////////////
+        target_brightness = calculateFeedbackBrightness();
+        last_brightness = current_brightness;
+        current_brightness = (target_brightness * 0.8) + (current_brightness * 0.2);
+
+        // calculate the actual values to be sent to the strips
+        red = (uint8_t)((double)red * current_brightness);
+        green = (uint8_t)((double)green * current_brightness);
+        blue = (uint8_t)((double)blue * current_brightness);
+
+        for (int i = 0; i < NUM_NEOP_MANAGERS; i++) {
+            neos[i].colorWipe(red, green, blue);
+        }
+        last_led_update_tmr = 0;
+    }
 }
 
 void loop() {
   updateAll();
-  // strikeBell();
-  // delay(2000);
-  /*
-    if (sol1_trigger > sol1_delay) {
-    triggerSolenoid(0, 30);
-    sol1_trigger = 0;
-    sol1_delay -= 10;
-    if (sol1_delay < 50) {
-      sol1_delay = 200;
-    }
-    }*/
-  /*
-    if (sol2_trigger > sol2_delay) {
-    triggerSolenoid(3, 50);
-    sol2_trigger = 0;
-    // sol2_delay += 10;
-    // if (sol2_delay > 200) {
-    //   sol2_delay = 50;
-    // }
-    }
-  */
-  /*
-    if (wb_trigger > 200) {
-    wb_trigger = 0;
-    shakeWashboard(50);
-    }
-  */
 }
