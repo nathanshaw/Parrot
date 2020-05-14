@@ -4,3 +4,9 @@
 [submodule "v2/firmware/parrot_main_test/NeopixelManager"]
 	path = v2/firmware/parrot_main_test/NeopixelManager
 	url = https://github.com/nathanshaw/NeopixelManager
+[submodule "v2/firmware/parrot_main_test/PlaybackEngine"]
+	path = v2/firmware/parrot_main_test/PlaybackEngine
+	url = https://github.com/nathanshaw/PlaybackEngine
+[submodule "firmware/main/LuxManager"]
+	path = firmware/main/LuxManager
+	url = https://github.com/nathanshaw/LuxManager.git
