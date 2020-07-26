@@ -32,7 +32,6 @@
 #define POT_PIN  14
 #define NUM_POTS 1
 
-
 #elif PCB_REVISION ==   1
 // solenoid outputs
 #define SOL1_PIN        3
@@ -72,6 +71,14 @@
 
 #endif /// PCB_REVISION
 
+// to keep track of if the different solenoid outputs are active or not
+bool sol_active[] = {false, false, false, false, false, false, false, false, false};
+unsigned long sol_timers[9];
+elapsedMillis last_sol_action[9];
+// time in ms in which the solenoids need to cool down between individual actuations
+#define SOL_COOLDOWN 10
+// the number of active solenoid channels, 4 for boards 1.1 & 1.0 6 for rev 2.0
+#define NUM_SOL_CHANNELS 9
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Status LED and Pot Pin ///////////////////////////////////

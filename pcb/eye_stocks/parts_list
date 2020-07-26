@@ -1,0 +1,35 @@
+Partlist
+
+Exported from lyre_eye_stocks_40mm_breakout.brd at 3/11/20 9:33 AM
+
+EAGLE Version 9.5.2 Copyright (c) 1988-2019 Autodesk, Inc.
+
+Assembly variant: 
+
+Part     Value          Package                       Library                 Position (mil)        Orientation
+
+C1       0.1uf          C0805                         rcl                     (-34.17717 -103.98819) R270
+C2       0.1uF          C0805                         rcl                     (-147 4)              MR90
+C3       1mF            153CLV-1012                   rcl                     (-51 411)             MR180
+C4       10uf           C0805                         rcl                     (-32.72441 102.5748)  R90
+C8       0.1uF          C0805                         rcl                     (158.83465 123.20472) MR90
+C9       200pF          C0805                         rcl                     (27.3937 116.59843)   MR0
+L/R_SEL                 1X03                          SparkFun-Connectors     (-70 -255)            MR180
+MK_REAR  SPH-IMPROVED   MIC_SPH0645LM4H-B_LARGER_RING SPH0645LM4H-B           (-0.29134 -0.62598)   MR90
+NC1      0.1uf          C0805K                        rcl                     (467.55906 -5)        R270
+NC2      0.1uf          C0805K                        rcl                     (145.99225 449.31804) R162
+NC3      0.1uf          C0805K                        rcl                     (-382.21272 277.69377) R234
+NC4      0.1uf          C0805K                        rcl                     (-382.21272 -277.69377) R306
+NC5      0.1uf          C0805K                        rcl                     (145.99225 -449.31804) R18
+NEO1     WS2812B5050    WS2812B                       adafruit                (629.92126 0)         R90
+NEO2     WS2812B5050    WS2812B                       adafruit                (194.65637 599.09067) R162
+NEO3     WS2812B5050    WS2812B                       adafruit                (-509.617 370.25837)  R234
+NEO4     WS2812B5050    WS2812B                       adafruit                (-509.617 -370.25837) R306
+NEO5     WS2812B5050    WS2812B                       adafruit                (194.65637 -599.09067) R18
+P1       B10B-PH-K      B10B-PH-K                     con-jst-ph              (285 20)              MR270
+R3       10R            R0805                         audio amplifier example (169.56693 218.40551) R0
+R5       4.7k           R0805                         audio amplifier example (179.03937 -96.92913) R180
+R6       4.7k           R0805                         audio amplifier example (364.24803 -8.92126)  R90
+R15      68R            M0805                         adafruit                (159.33465 -36.01575) MR270
+U1       SHTC3          SHTC3                         SHTC3                   (-245 0)              MR90
+VEML_F   VEML7700-TT    VEML7700                      VEML7700-TT             (-137.44882 -124.55906) R90

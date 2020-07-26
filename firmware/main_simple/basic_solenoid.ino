@@ -5,10 +5,16 @@ void triggerSolenoid(uint8_t num, uint16_t on_time) {
     digitalWrite(s_pins[num], HIGH);
     last_sol_action[num] = 0;
     sol_timers[num] = on_time;
+    if (on_time < sol_min[num]) {
+      on_time = sol_min[num];
+    }
+    if (on_time > sol_max[num]) {
+      on_time = sol_max[num];
+    }
     sol_active[num] = true;
     Serial.print("solenoid ");
     Serial.print(num);
-    Serial.println(" enguaged");
+    Serial.println(" engaged");
   } else {
     Serial.print("did not trigger solenoid ");
     Serial.print(num);
