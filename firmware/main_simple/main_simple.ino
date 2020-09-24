@@ -262,15 +262,28 @@ void testSolenoids(unsigned int len) {
 //////////////////////////////////////////////////////////////////////////
 #if SHT_PRESENT > 0
 SHTSensor sht;
-double temp = 0.0;
-double humidity = 0.0;
+
 elapsedMillis last_shtc_poll;
+uint16_t SHTC_POLLING_RATE = 1000 * 60 * 5; // in ms
+
+// current temperature, min temp recorded, max temp recorded, and avereage temp recorded
+double temp = 0.0;
+double temp_max = 0.0;
+double temp_min = 1000.0;
+double temp_avg = 0.0;
+double temp_total = 0.0;    // sum of all temps recorded thus far
+
+double humidity = 0.0;
+double humid_max = 0.0;
+double humid_min = 1000.0;
+double humid_avg = 0.0;
+double humid_total = 0.0;
+
+uint16_t shtc_readings = 0; // total number of temp readings taken
 
 // the lower the value the less a new reading changes things
 #define TEMP_LOWPASS 0.5
 #define HUMIDITY_LOWPASS 0.5
-
-#define SHTC_POLLING_RATE 10000
 
 void updateTempHumidity()
 {
@@ -284,6 +297,7 @@ void updateTempHumidity()
       Serial.print(h, 2);
       Serial.print("\t");
       humidity = (humidity * (1.0 - HUMIDITY_LOWPASS)) + (h * HUMIDITY_LOWPASS);
+      updateMinMax(humidity, humid_min, humid_max);
       Serial.print(humidity, 2);
       Serial.print("\n");
       Serial.print("  T:  ");
@@ -291,6 +305,7 @@ void updateTempHumidity()
       Serial.print(t, 2);
       Serial.print("\t");
       temp = (temp * (1.0 - TEMP_LOWPASS)) + (t * TEMP_LOWPASS);
+      updateMinMax(temp, temp_min, temp_max);
       Serial.print(temp, 2);
       Serial.print("\n");
     } else {
@@ -540,14 +555,17 @@ void readControls() {
 ////////////////// setup / main loops ////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 void setup() {
-  analogWriteResolution(10);
+  analogWriteResolution(10);// change the write resolution to 10 bits
   Serial.begin(115200);
   delay(2000);
   Serial.println("Starting Lyre setup() loop\n");
+  
+  ///////////////////// user controls /////////////////////////////////////////////////
   // test the user controls and then read the ones that need to be read
   setupAndTestControls(2000);
   readControls();
   delay(1000);
+  
   ///////////////////// h-bridge motors ///////////////////////////////////////////////
 #if MOTORS_ACTIVE > 0
   Serial.println("Starting Motor Set-up");
@@ -605,7 +623,7 @@ void setup() {
   Serial.println("-------------------------------------------------------------");
 #endif
 
-  ///////////////////// NeoPixel Strips
+  ///////////////////// NeoPixel Strips ////////////////////////////////////////////////
 #if LEDS_ACTIVE > 0
   Serial.println("Starting and Testing LEDs");
   for (int i = 0;  i < 3; i++) {
@@ -621,7 +639,7 @@ void setup() {
   Serial.println("-------------------------------------------------------------");
 #endif // LEDS_ACTIVE
 
-  ///////////////////// temp and humidity sensor //
+  ///////////////////// temp and humidity sensor /////////////////////////////////////////
 #if SHT_ACTIVE > 0
   Serial.println("Starting Wire for SHT temp/humid sensor");
   Wire.begin();
@@ -642,7 +660,7 @@ void setup() {
   Serial.println("-------------------------------------------------------------");
 #endif //SHT_ACTIVE
 
-  ////////////////////// Audio
+  ////////////////////// Audio ////////////////////////////////////////////////////////////////
 #if MICROPHONE_ACTIVE > 0
   Serial.println("Starting to setup microphone and audio");
   AudioMemory(AUDIO_MEMORY);
@@ -795,6 +813,27 @@ void updateEnvironmentalSensors() {
 #endif // PC_REVISION
 }
 
+
+
+void determineActivity() {
+  // should it be a state machine?
+  //  state 0 = waiting
+  //  state 1 = preparing
+  //  state 2 = actuating
+  
+  // a default value of 1 minute between actuations will be used as a base line
+  // what will the bot do given the current environmental data and its given programming
+  
+  // the temperature and ambiant light levels are positively correlated with actuation times
+  
+  // humidity is negatively correlated with actuation times
+
+  // Once a sonic event is flagged to happen the bot will wait until the PEAK/RMS/FFT power is below the "threshold" for x frames in a row
+  // before begenning its actuation
+
+  // TODO - which sonic event that is chosen could depend on environmental conditions (some sounds at night vs daytime for instance).
+}
+
 //////////////////////////////// Global Variables /////////////////////////
 
 void loop() {
@@ -803,4 +842,5 @@ void loop() {
   updateEnvironmentalSensors();
   updateFeedbackLEDFromEnvironment();
   updateActuators();
+  determineActivity();
 }

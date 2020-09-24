@@ -1,5 +1,6 @@
 ///////////////////////// WASHBOARD / PECKER MODULE /////////////////////////////
 // 0 is off, 1 is forward, -1 is backward
+/*
 int8_t hbridge_state = 0;
 uint16_t hbridge_forward_remaining = 0;
 uint16_t hbridge_backward_remaining = 0;
@@ -48,3 +49,4 @@ void updateHBridge() {
     }
   }
 }
+*/

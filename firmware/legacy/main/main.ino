@@ -1,6 +1,4 @@
 /* Mechatronic Creatures
-  "Bowl Bot" Genus
-  using the Adafruit Huzzah ESP8266 Microcontroller
 */
 #include "SHTSensor.h"
 #include <DualMAX14870MotorShield.h>
@@ -18,10 +16,6 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include <EEPROM.h>
-
-#ifdef __AVR__
-#include <avr/power.h> // Required for 16 MHz Adafruit Trinket
-#endif
 
 // a higher level the more debug printing occurs
 #define DEBUG 0
@@ -64,10 +58,9 @@ void dbPrintln(String msg, uint8_t level) {
 //////////////////////////////////////////////////////////////////////////
 ///////////////////  Solenoids/actuators  ////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-
-const int s_pins[] = {SOL1_PIN, SOL2_PIN, SOL3_PIN, SOL4_PIN, SOL5_PIN, SOL6_PIN};
-uint16_t sol_on_time[] = {30, 30, 30, 30, 30, 30};
-bool sol_state[] = {false, false, false, false, false, false}; // is the solenoid on or off
+const int s_pins[] = {SOL1_PIN, SOL2_PIN, SOL3_PIN, SOL4_PIN, SOL5_PIN, SOL6_PIN, SOL7_PIN, SOL8_PIN, SOL9_PIN};
+uint16_t sol_on_time[] = {30, 30, 30, 30, 30, 30, 30, 30, 30};
+bool sol_state[] = {false, false, false, false, false, false, false, false, false}; // is the solenoid on or off
 
 void testSolenoids(unsigned int len) {
   elapsedMillis t = 0;
@@ -106,110 +99,56 @@ NeoGroup neos[3] = {
   NeoGroup(&leds[2], 0, LED3_COUNT, "large")
 };
 
-#define MAX_BRIGHTNESS        255
-
 //////////////////////////////////////////////////////////////////////////
 ///////////////////// H-Bridge Motor Driver //////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 // H-Bridge Motor (MAX14870)
-// #define LED_PIN 13
-#define MOT_DIR_PIN 21
-#define MOT_PWM_PIN 22
-#define MOT_EN_PIN 20
-#define MOT_FAULT_PIN 2
-DualMAX14870MotorShield motor(MOT_DIR_PIN, MOT_PWM_PIN, 31, 32, MOT_EN_PIN, MOT_FAULT_PIN); // 31, 32, and 33 are unused pins
 
-void testMotor(unsigned int len) {
-  motor.enableDrivers();
-  Serial.println();//"------------------------------");
-  Serial.print("Starting Motor Test\n");
-  motor.setM1Speed(50);
-  Serial.print(" 50\t");
-  delay(len / 14);
-  motor.setM1Speed(150);
-  Serial.print(" 150\t");
-  delay(len / 3.5);
-  motor.setM1Speed(50);
-  Serial.print(" 50\t");
-  delay(len / 7);
-  // motor.setM1Speed(0);
-  // Serial.print(" 0");
-  // delay(len / 7);
-  motor.setM1Speed(-50);
-  Serial.print(" -50\t");
-  delay(len / 7);
-  motor.setM1Speed(-250);
-  Serial.print(" -250\t");
-  delay(len / 3.5);
-  motor.setM1Speed(-50);
-  Serial.print(" -50\t");
-  delay(len / 14);
-  Serial.print(" 0");
-  motor.setM1Speed(0);
-  motor.disableDrivers();
-  Serial.println("\nFinished Motor Test");
-  Serial.println();//"----------------------------");
-}
+// TODO need a better way of dealing with this...
+DualMAX14870MotorShield motor[3] = {
+  DualMAX14870MotorShield(M1_DIR, M1_SPEED, 100, 100, M1_COAST, M1_FAULT),
+  DualMAX14870MotorShield(M2_DIR, M2_SPEED, 100, 100, M2_COAST, M2_FAULT),
+  DualMAX14870MotorShield(M3_DIR, M3_SPEED, 100, 100, M3_COAST, M3_FAULT)
+}; // 31, 32, and 33 are unused pins
 
-//////////////////////////////////////////////////////////////////////////
-/////////////////////  LDR's /////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-// reading of around 50-60 in the office with normal light
-// reading of around 150 when covered
-uint8_t ldr_pins[2] = {15, 16};
-
-uint16_t ldr_vals[2];
-
-elapsedMillis last_ldr_reading;
-
-#define LDR_POLL_RATE 30000
-
-void updateLDRs(bool printValues) {
-  if (last_ldr_reading > LDR_POLL_RATE) {
-    ldr_vals[0] = analogRead(ldr_pins[0]);
-    ldr_vals[1] = analogRead(ldr_pins[1]);
-    if (printValues) {
-      Serial.print("LDR Readings: ");
-      Serial.print(ldr_vals[0]);
-      Serial.print("\t");
-      Serial.println(ldr_vals[1]);
-    }
-    last_ldr_reading = 0;
+void testMotors(unsigned int len) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motor[i].enableDrivers();
+    Serial.println();//"------------------------------");
+    Serial.print("Starting Motor ");
+    Serial.print(i);
+    Serial.println(" Test\n");
+    motor[i].setM1Speed(50);
+    Serial.print(" 50\t");
+    delay(len / 14);
+    motor[i].setM1Speed(150);
+    Serial.print(" 150\t");
+    delay(len / 3.5);
+    motor[i].setM1Speed(50);
+    Serial.print(" 50\t");
+    delay(len / 7);
+    // motor[i].setM1Speed(0);
+    // Serial.print(" 0");
+    // delay(len / 7);
+    motor[i].setM1Speed(-50);
+    Serial.print(" -50\t");
+    delay(len / 7);
+    motor[i].setM1Speed(-250);
+    Serial.print(" -250\t");
+    delay(len / 3.5);
+    motor[i].setM1Speed(-50);
+    Serial.print(" -50\t");
+    delay(len / 14);
+    Serial.print(" 0");
+    motor[i].setM1Speed(0);
+    motor[i].disableDrivers();
+    Serial.print("\nFinished Motor ");
+    Serial.print(i);
+    Serial.println("Test");
+    Serial.println();//"----------------------------");
   }
 }
 
-void testLDRs(uint32_t delay_time) {
-  Serial.print("Testing LDR Sensors ");
-  calibrateLDRs(delay_time);
-}
-
-void calibrateLDRs(uint32_t delay_time) {
-  // read temp and humidity 10 times and average the reading over the last 10
-  int l1  = 0.0;
-  int ll1 = 0.0;
-  int l2  = 0.0;
-  int ll2 = 0.0;
-  delay_time = delay_time / 10;
-  Serial.println("\n----- starating ldr calibration -----");
-  for (int i = 0; i  < 10; i++) {
-    l1 = analogRead(ldr_pins[0]);
-    Serial.print("l1: "); Serial.print(l1); Serial.print("\t");
-    ll1 += l1;
-    l2 = analogRead(ldr_pins[1]);
-    ll2 += l2;
-    Serial.print("l2: "); Serial.print(l2); Serial.print("\n");
-    delay(delay_time);
-  }
-  ldr_vals[0] = ll1 / 10;
-  ldr_vals[1] = ll2 / 10;
-  // todo set global brightness values for this
-  Serial.print("ldr1_brightness  : ");
-  Serial.print(ldr_vals[0]);
-  Serial.print("\tldr2_brightness  : ");
-  Serial.println(ldr_vals[1]);
-  Serial.println("ended LDR calibration");
-  Serial.println("-------------------------------");
-}
 
 //////////////////////////////////////////////////////////////////////////
 ////////////////// temp and humidity /////////////////////////////////////
@@ -334,12 +273,6 @@ RhythmBank rhythm_bank = RhythmBank();
 PlaybackEngine playback_engine = PlaybackEngine();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// Status LED and Pot Pin ///////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-#define LED_PIN         17
-#define POT_PIN         14
-
-///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Rhythm detection stuff ///////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // the maximum number of rhythms to store
@@ -384,6 +317,17 @@ BellMechanism bells[3] = {
   BellMechanism(s_pins[4], s_pins[5], 20, 1000.0, 40)
 };
 
+void testSolenoids() {
+  Serial.println("Testing Solenoids Now");
+  for (int t = 0; t < 4; t++) {
+    for (int i = 0; i < 9; i++) {
+      digitalWrite(s_pins[i], HIGH);
+      delay(75);
+      digitalWrite(s_pins[i], LOW);
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////
 ////////////////// setup / main loops ////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -399,13 +343,22 @@ void setup() {
   pinMode(s_pins[3], OUTPUT);
   pinMode(s_pins[4], OUTPUT);
   pinMode(s_pins[5], OUTPUT);
+  pinMode(s_pins[6], OUTPUT);
+  pinMode(s_pins[7], OUTPUT);
+  pinMode(s_pins[8], OUTPUT);
+
   digitalWrite(s_pins[0], LOW);
   digitalWrite(s_pins[1], LOW);
   digitalWrite(s_pins[2], LOW);
   digitalWrite(s_pins[3], LOW);
   digitalWrite(s_pins[4], LOW);
   digitalWrite(s_pins[5], LOW);
+  digitalWrite(s_pins[6], LOW);
+  digitalWrite(s_pins[7], LOW);
+  digitalWrite(s_pins[8], LOW);
   Serial.println("Finished setting solenoid pins to outputs");
+
+  testSolenoids();
 
   /////////////// ldr outputs
   lux_manager.addLuxSensor("Top");
@@ -418,12 +371,15 @@ void setup() {
 
   ///////////////////// h-bridge motors
   // motor.enableDrivers();
-  motor.flipM1(false);
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motor[i].flipM1(false);
+  }
 
   ///////////////////// NeoPixel Strips
-  leds[0].begin();
-  leds[1].begin();
-  leds[2].begin();
+  for (int i = 0;  i < 3; i++) {
+    leds[i].begin();
+    neos[i].colorWipe(255, 255, 0);
+  }
 
   ///////////////////// temp and humidity sensor //
   Wire.begin();
@@ -534,7 +490,7 @@ void updateAll() {
   updateTempHumidity();
   updateSolenoids(); // turns off all solenoids which have
   // been activated using triggerSolenoid
-  updateHBridge();   //
+  // updateHBridge();   //
   fc.update();
   runtimeTests();
   updateFeedbackLEDs();
@@ -551,16 +507,13 @@ void updateAll() {
 
 void runtimeTests() {
   if (TEST_MOTOR) {
-    testMotor(5000);
+    testMotors(5000);
   }
   if (TEST_SOLENOIDS) {
     testSolenoids(2000);
   }
   if (TEST_TEMP_HUMIDITY) {
     testTempHumidity(500);
-  }
-  if (TEST_LDRS) {
-    testLDRs(1000);
   }
 }
 

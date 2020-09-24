@@ -1,13 +1,20 @@
 /* Mechatronic Creatures
+  "Bowl Bot" Genus
+  using the Adafruit Huzzah ESP8266 Microcontroller
 */
-#include "SHTSensor.h"
+#include <NeopixelManager.h>
+#include <WeatherManager.h>
+#include <AudioEngine.h>
+#include <LuxManager.h>
+#include <PrintUtils.h>
+#include <UIManager.h>
+
+// TODO - update to the way that motors are taken care of in the main_simple program
 #include <DualMAX14870MotorShield.h>
-#include "NeopixelManager/NeopixelManager.h"
-#include "AudioEngine/AudioEngine.h"
-#include "AudioEngine/FFTManager1024.h"
+
 #include "Mechanisms/Mechanisms.h"
 #include "PlaybackEngine/PlaybackEngine.h"
-#include "LuxManager/LuxManager.h"
+
 #include <WS2812Serial.h>
 #include "Configuration.h"
 #include <Audio.h>
@@ -16,6 +23,11 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include <EEPROM.h>
+#include "Macros.h"
+
+#ifdef __AVR__
+#include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
 
 // a higher level the more debug printing occurs
 #define DEBUG 0
@@ -31,36 +43,22 @@
 #define PRINT_PEAK_VALS 0
 
 // should the program datalog?
-#define DATALOG 1
-#define PRINT_EEPROM_ON_BOOT 1
+#define DATALOG 0
+#define PRINT_EEPROM_ON_BOOT 0
 
 #define lux_min_reading_delay (1000 * 15)
 #define lux_max_reading_delay (1000 * 60 * 3)
 // lux managers to keep track of the VEML readings
-LuxManager lux_manager = LuxManager(lux_min_reading_delay, lux_max_reading_delay);
+LuxManager lux_manager = LuxManager(lux_min_reading_delay, lux_max_reading_delay, LUX_MAPPING_SCHEMA);
 // LuxManager lux_manager = LuxManager(lux_min_reading_delay, lux_max_reading_delay, (String)"Front", &neos[0]);
-
-//////////////////////////////////////////////////////////////////////////
-///////////////////  Debug Printing  /////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-void dbPrint(String msg, uint8_t level) {
-  if (level <= DEBUG) {
-    Serial.print(msg);
-  }
-}
-
-void dbPrintln(String msg, uint8_t level) {
-  if (level <= DEBUG) {
-    Serial.println(msg);
-  }
-}
 
 //////////////////////////////////////////////////////////////////////////
 ///////////////////  Solenoids/actuators  ////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-const int s_pins[] = {SOL1_PIN, SOL2_PIN, SOL3_PIN, SOL4_PIN, SOL5_PIN, SOL6_PIN, SOL7_PIN, SOL8_PIN, SOL9_PIN};
-uint16_t sol_on_time[] = {30, 30, 30, 30, 30, 30, 30, 30, 30};
-bool sol_state[] = {false, false, false, false, false, false, false, false, false}; // is the solenoid on or off
+
+const int s_pins[] = {SOL1_PIN, SOL2_PIN, SOL3_PIN, SOL4_PIN, SOL5_PIN, SOL6_PIN};
+uint16_t sol_on_time[] = {30, 30, 30, 30, 30, 30};
+bool sol_state[] = {false, false, false, false, false, false}; // is the solenoid on or off
 
 void testSolenoids(unsigned int len) {
   elapsedMillis t = 0;
@@ -83,20 +81,17 @@ void testSolenoids(unsigned int len) {
 /////////////////////////  NeoPixels /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-const uint16_t max_led_count = max(max(LED1_COUNT, LED2_COUNT), LED3_COUNT);
-
-byte drawingMemory[3][max_led_count * 3];       //  3 bytes per LED
-DMAMEM byte displayMemory[3][max_led_count * 12]; // 12 bytes per LED
-
+// TODO - dynamically create these objects based on info in the configuration file
 WS2812Serial leds[3] = {WS2812Serial(LED1_COUNT, displayMemory[0], drawingMemory[0], LED1_PIN, WS2812_GRB),
                         WS2812Serial(LED2_COUNT, displayMemory[1], drawingMemory[1], LED2_PIN, WS2812_GRB),
                         WS2812Serial(LED3_COUNT, displayMemory[2], drawingMemory[2], LED3_PIN, WS2812_GRB)
                        };
 
+// TODO - likewise for these
 NeoGroup neos[3] = {
-  NeoGroup(&leds[0], 0, LED1_COUNT, "small"),
-  NeoGroup(&leds[1], 0, LED2_COUNT, "medium"),
-  NeoGroup(&leds[2], 0, LED3_COUNT, "large")
+  NeoGroup(&leds[0], 0, LED1_COUNT, LED1_NAME),
+  NeoGroup(&leds[1], 0, LED2_COUNT, LED2_NAME),
+  NeoGroup(&leds[2], 0, LED3_COUNT, LED3_NAME)
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -104,68 +99,57 @@ NeoGroup neos[3] = {
 //////////////////////////////////////////////////////////////////////////
 // H-Bridge Motor (MAX14870)
 
-// TODO need a better way of dealing with this...
-DualMAX14870MotorShield motor[3] = {
-  DualMAX14870MotorShield(M1_DIR, M1_SPEED, 100, 100, M1_COAST, M1_FAULT),
-  DualMAX14870MotorShield(M2_DIR, M2_SPEED, 100, 100, M2_COAST, M2_FAULT),
-  DualMAX14870MotorShield(M3_DIR, M3_SPEED, 100, 100, M3_COAST, M3_FAULT)
-}; // 31, 32, and 33 are unused pins
+DualMAX14870MotorShield motors[3] = {DualMAX14870MotorShield(MOT1_DIR_PIN, MOT1_PWM_PIN, 24, 24, MOT1_EN_PIN, MOT1_FAULT_PIN),
+                                     DualMAX14870MotorShield(MOT2_DIR_PIN, MOT2_PWM_PIN, 24, 24, MOT2_EN_PIN, MOT2_FAULT_PIN),
+                                     DualMAX14870MotorShield(MOT3_DIR_PIN, MOT3_PWM_PIN, 24, 24, MOT3_EN_PIN, MOT3_FAULT_PIN)
+                                    };
 
-void testMotors(unsigned int len) {
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motor[i].enableDrivers();
-    Serial.println();//"------------------------------");
-    Serial.print("Starting Motor ");
-    Serial.print(i);
-    Serial.println(" Test\n");
-    motor[i].setM1Speed(50);
-    Serial.print(" 50\t");
-    delay(len / 14);
-    motor[i].setM1Speed(150);
-    Serial.print(" 150\t");
-    delay(len / 3.5);
-    motor[i].setM1Speed(50);
-    Serial.print(" 50\t");
-    delay(len / 7);
-    // motor[i].setM1Speed(0);
-    // Serial.print(" 0");
-    // delay(len / 7);
-    motor[i].setM1Speed(-50);
-    Serial.print(" -50\t");
-    delay(len / 7);
-    motor[i].setM1Speed(-250);
-    Serial.print(" -250\t");
-    delay(len / 3.5);
-    motor[i].setM1Speed(-50);
-    Serial.print(" -50\t");
-    delay(len / 14);
-    Serial.print(" 0");
-    motor[i].setM1Speed(0);
-    motor[i].disableDrivers();
-    Serial.print("\nFinished Motor ");
-    Serial.print(i);
-    Serial.println("Test");
-    Serial.println();//"----------------------------");
-  }
+void testMotor(int w, unsigned int len) {
+  motors[w].enableDrivers();
+  Serial.println();//"------------------------------");
+  Serial.print("Starting Motor Test\n");
+  motors[w].setM1Speed(50);
+  Serial.print(" 50\t");
+  delay(len / 14);
+  motors[w].setM1Speed(150);
+  Serial.print(" 150\t");
+  delay(len / 3.5);
+  motors[w].setM1Speed(50);
+  Serial.print(" 50\t");
+  delay(len / 7);
+  // motor.setM1Speed(0);
+  // Serial.print(" 0");
+  // delay(len / 7);
+  motors[w].setM1Speed(-50);
+  Serial.print(" -50\t");
+  delay(len / 7);
+  motors[w].setM1Speed(-250);
+  Serial.print(" -250\t");
+  delay(len / 3.5);
+  motors[w].setM1Speed(-50);
+  Serial.print(" -50\t");
+  delay(len / 14);
+  Serial.print(" 0");
+  motors[w].setM1Speed(0);
+  motors[w].disableDrivers();
+  Serial.println("\nFinished Motor Test");
+  Serial.println();//"----------------------------");
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 ////////////////// temp and humidity /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-SHTSensor sht;
-double temp = 0.0;
-double humidity = 0.0;
-elapsedMillis last_shtc_poll;
+WeatherManager weather_manager = WeatherManager(HUMID_EXTREME_THRESH, TEMP_EXTRME_THRESH, TEMP_HISTORESIS, WM_UPDATE_DELAY);
+/*SHTSensor sht;
+  double temp = 0.0;
+  double humidity = 0.0;
+  elapsedMillis last_shtc_poll;
 
-// the lower the value the less a new reading changes things
-#define TEMP_LOWPASS 0.5
-#define HUMIDITY_LOWPASS 0.5
+  // the lower the value the less a new reading changes things
 
-#define SHTC_POLLING_RATE 10000
 
-void updateTempHumidity()
-{
+  void updateTempHumidity()
+  {
   // if it is time to update the temp/humidity
   if (last_shtc_poll > SHTC_POLLING_RATE) {
     // poll the reading
@@ -191,15 +175,15 @@ void updateTempHumidity()
     Serial.println("---------------------------");
     last_shtc_poll = 0;
   }
-}
+  }
 
-void testTempHumidity(uint32_t delay_time) {
+  void testTempHumidity(uint32_t delay_time) {
   last_shtc_poll = SHTC_POLLING_RATE + 1;
   updateTempHumidity();
   delay(delay_time);
-}
+  }
 
-void calibrateTempHumidity(uint32_t delay_time) {
+  void calibrateTempHumidity(uint32_t delay_time) {
   // read temp and humidity 10 times and average the reading over the last 10
   double h  = 0.0;
   double hh = 0.0;
@@ -232,8 +216,8 @@ void calibrateTempHumidity(uint32_t delay_time) {
   Serial.println(temp);
   Serial.println("\nended temp/humidity calibration");
   Serial.println("-------------------------------");
-}
-
+  }
+*/
 //////////////////////////////////////////////////////////////////////////
 ////////////////// Audio /////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -253,7 +237,7 @@ AudioConnection          patchCord11(input_amp, 0, usb_output, 1);
 double peak_val = 0.0;
 double last_peak = 0.0;
 
-FFTManager1024 fft_features = FFTManager1024("Input FFT");
+FFTManager1024 fft_manager = FFTManager1024("Input FFT");
 FeatureCollector fc = FeatureCollector("ALL");
 
 Rhythm rhythm[10] = {
@@ -271,6 +255,11 @@ Rhythm rhythm[10] = {
 
 RhythmBank rhythm_bank = RhythmBank();
 PlaybackEngine playback_engine = PlaybackEngine();
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// User Controls ////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+UIManager uimanager = UIManager(UI_POLLING_RATE, POT_PLAY, P_UIMANAGER);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Rhythm detection stuff ///////////////////////////////////
@@ -317,81 +306,72 @@ BellMechanism bells[3] = {
   BellMechanism(s_pins[4], s_pins[5], 20, 1000.0, 40)
 };
 
-void testSolenoids() {
-  Serial.println("Testing Solenoids Now");
-  for (int t = 0; t < 4; t++) {
-    for (int i = 0; i < 9; i++) {
-      digitalWrite(s_pins[i], HIGH);
-      delay(75);
-      digitalWrite(s_pins[i], LOW);
-    }
-  }
-}
-
 //////////////////////////////////////////////////////////////////////////
 ////////////////// setup / main loops ////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-void setup() {
-  Serial.begin(115200);
-  delay(3000);// let the system settle
-  Serial.println("starting setup loop");
+bool but_test[4];
+float pot_test[4];
 
-  /////////////// solenoid outputs
+void setup() {
+  Serial.begin(57600);
+  delay(3000);// let the system settle
+  printMajorDivide("starting setup loop");
+  /////////////// User Controls ////////////////////////////////////////////
+  uimanager.addBut(BUT1_PIN, BUT1_REVERSE, BUT1_PULLUP, &but_test[0], BUT1_NAME);
+  uimanager.addBut(BUT2_PIN, BUT2_REVERSE, BUT2_PULLUP, &but_test[1], BUT2_NAME);
+  uimanager.addBut(BUT3_PIN, BUT3_REVERSE, BUT3_PULLUP, &but_test[2], BUT3_NAME);
+  uimanager.addBut(BUT4_PIN, BUT4_REVERSE, BUT4_PULLUP, &but_test[3], BUT4_NAME);
+
+  uimanager.addPot(POT1_PIN, POT1_REVERSE, &pot_test[0], POT1_NAME);
+  uimanager.addPot(POT2_PIN, POT2_REVERSE, &pot_test[1], POT2_NAME);
+
+  uimanager.setup();
+  uimanager.printAll();
+
+  /////////////// Solenoid Outputs /////////////////////////////////////////
   pinMode(s_pins[0], OUTPUT);
   pinMode(s_pins[1], OUTPUT);
   pinMode(s_pins[2], OUTPUT);
   pinMode(s_pins[3], OUTPUT);
   pinMode(s_pins[4], OUTPUT);
   pinMode(s_pins[5], OUTPUT);
-  pinMode(s_pins[6], OUTPUT);
-  pinMode(s_pins[7], OUTPUT);
-  pinMode(s_pins[8], OUTPUT);
-
   digitalWrite(s_pins[0], LOW);
   digitalWrite(s_pins[1], LOW);
   digitalWrite(s_pins[2], LOW);
   digitalWrite(s_pins[3], LOW);
   digitalWrite(s_pins[4], LOW);
   digitalWrite(s_pins[5], LOW);
-  digitalWrite(s_pins[6], LOW);
-  digitalWrite(s_pins[7], LOW);
-  digitalWrite(s_pins[8], LOW);
   Serial.println("Finished setting solenoid pins to outputs");
 
-  testSolenoids();
-
-  /////////////// ldr outputs
-  lux_manager.addLuxSensor("Top");
-  // lux_manager.linkNeoGroup(&neos[0]);
-  // lux_manager.linkNeoGroup(&neos[0]);
-  // lux_manager.linkNeoGroup(&neos[0]);
-  lux_manager.startSensors(VEML7700_GAIN_1, VEML7700_IT_25MS); // todo add this to config_adv? todo
+  ///////////////////// Lux Manager
+  printMinorDivide();
+  Serial.println("Starting LuxManager");
+  lux_manager.setLuxThresholds(LOW_LUX_THRESHOLD, MID_LUX_THRESHOLD, HIGH_LUX_THRESHOLD, EXTREME_LUX_THRESHOLD);
+  lux_manager.add7700Sensor((String)"Eye-Stock");
+  lux_manager.linkNeoGroup(&neos[0]);
+  lux_manager.linkNeoGroup(&neos[1]);
+  lux_manager.linkNeoGroup(&neos[2]);
+  lux_manager.start7700Sensor(VEML7700_GAIN_1, VEML7700_IT_25MS); // todo add this to config_adv? todo
   delay(200);
-  lux_manager.calibrate(3000);
 
-  ///////////////////// h-bridge motors
-  // motor.enableDrivers();
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motor[i].flipM1(false);
-  }
+  lux_manager.calibrate(3000, true);
+  Serial.println("Finished starting LuxManager");
+  printMinorDivide();
 
   ///////////////////// NeoPixel Strips
-  for (int i = 0;  i < 3; i++) {
-    leds[i].begin();
-    neos[i].colorWipe(255, 255, 0);
-  }
-
+  printMinorDivide();
+  Serial.println("Starting the LED strips");
+  leds[0].begin();
+  leds[1].begin();
+  leds[2].begin();
+  Serial.println("Finished starting the LED strips");
+  printMinorDivide();
   ///////////////////// temp and humidity sensor //
-  Wire.begin();
-  if (sht.init()) {
-    Serial.print("init(): success\n");
-  } else {
-    Serial.print("init(): failed\n");
-  }
-  sht.setAccuracy(SHTSensor::SHT_ACCURACY_MEDIUM); // only supported by SHT3x
-  calibrateTempHumidity(4000);
+  weather_manager.init();
 
   ////////////////////// Audio
+  printMinorDivide();
+  Serial.println("Starting the Audio system");
   AudioMemory(AUDIO_MEMORY);
   // TODO make this proper
   uint32_t lpf = 14000;
@@ -469,53 +449,21 @@ void setup() {
   playback_engine.linkMechanism(& bells[1]);
   playback_engine.linkMechanism(& bells[2]);
 
-  fft_features.linkFFT(&fft);
-  fft_features.setCentroidActive(true);
-  fft_features.setFluxActive(true);
-  fft_features.setFFTScaler(100);
+  fft_manager.linkFFT(&fft);
+  fft_manager.setCalculateCent(true);
+  fft_manager.setCalculateFlux(true);
 
-  fc.linkPeak(&peak, 1000.0, PRINT_PEAK_VALS);
+  fc.linkPeak(&peak, PRINT_PEAK_VALS);
+  Serial.println("Finished starting the LED strips");
+  printMinorDivide();
 
+  printMinorDivide();
+  delay(3000);
   Serial.println("Finished setup Loop");
-  delay(8000);
-  Serial.println("-----------------------------------");
+  printMinorDivide();
 }
 
 elapsedMillis last_playback_tmr;
-
-void updateAll() {
-  // this function keeps all the needed update functions in one place
-  updateDatalog();
-  updateLDRs(true);
-  updateTempHumidity();
-  updateSolenoids(); // turns off all solenoids which have
-  // been activated using triggerSolenoid
-  // updateHBridge();   //
-  fc.update();
-  runtimeTests();
-  updateFeedbackLEDs();
-  playback_engine.update();
-  if (last_playback_tmr > 1000) {
-    Serial.println("playing rhythm through playback_engine");
-    playback_engine.playRhythm(rhythm_bank.getRandomRhythm());
-    last_playback_tmr = 0;
-  }
-  for (int i = 0; i < 3; i++) {
-    bells[i].update();
-  }
-}
-
-void runtimeTests() {
-  if (TEST_MOTOR) {
-    testMotors(5000);
-  }
-  if (TEST_SOLENOIDS) {
-    testSolenoids(2000);
-  }
-  if (TEST_TEMP_HUMIDITY) {
-    testTempHumidity(500);
-  }
-}
 
 //////////////////////////////// Global Variables /////////////////////////
 double color_feature_min = 1.00;
@@ -556,7 +504,7 @@ double current_feature;
 
 double calculateColorFromCentroid() {
   /* Should return a number between 0.0 and 1.0 */
-  double cent = fft_features.getCentroid();       // right now we are only polling the first FC for its centroid to use to color both sides
+  double cent = fft_manager.getCentroid();       // right now we are only polling the first FC for its centroid to use to color both sides
   if (cent < color_feature_min) {
     color_feature_min = (color_feature_min * 0.9) + (cent * 0.1);
     cent = color_feature_min;
@@ -574,7 +522,7 @@ double calculateColorFromCentroid() {
 
 double calculateFeedbackBrightness() {
   // how much energy is stored in the range of 4000 - 16000 compared to  the entire spectrum?
-  double target_brightness = fft_features.getFFTRangeByFreq(100, 16000);
+  double target_brightness = fft_manager.getFFTRangeByFreq(100, 16000);
   if (target_brightness < 0.01) {
     target_brightness = 0.0;
   } else if (target_brightness > 1.0) {
@@ -654,9 +602,9 @@ void updateFeedbackLEDs() {
       blue = ((1.0 - current_color) * BLUE_LOW) + (current_color * BLUE_HIGH);
     } else if (COLOR_FEATURE == SPLIT_BAND) {
       /* Should return a number between 0.0 and 1.0 */
-      double green_d  = fft_features.getFFTRangeByFreq(50, 400); // 3 octaves in each band
-      double blue_d = fft_features.getFFTRangeByFreq(400, 3200);
-      double red_d = fft_features.getFFTRangeByFreq(3200, 12800);
+      double green_d  = fft_manager.getFFTRangeByFreq(50, 400); // 3 octaves in each band
+      double blue_d = fft_manager.getFFTRangeByFreq(400, 3200);
+      double red_d = fft_manager.getFFTRangeByFreq(3200, 12800);
       red = (uint8_t)((double)MAX_BRIGHTNESS * (red_d / (red_d + green_d + blue_d)));
       green = (uint8_t)((double)MAX_BRIGHTNESS * (green_d / (red_d + green_d + blue_d)));
       blue = (uint8_t)((double)MAX_BRIGHTNESS * (blue_d / (red_d + green_d + blue_d)));
@@ -673,12 +621,59 @@ void updateFeedbackLEDs() {
     blue = (uint8_t)((double)blue * current_brightness);
 
     for (int i = 0; i < NUM_NEOP_MANAGERS; i++) {
-      neos[i].colorWipe(red, green, blue);
+      neos[i].colorWipe(red, green, blue, 1.0);
     }
     last_led_update_tmr = 0;
   }
 }
 
 void loop() {
-  updateAll();
+  ///////////////// Ambient Lighting //////////////////
+  if (lux_manager.update()) {
+    // print the updated
+    lux_manager.print();
+  }
+
+  ///////////////// User Controls /////////////////////
+  uimanager.update();
+  // uimanager.printAll();
+
+  ///////////////// Temp / Humidity ///////////////////
+  if (weather_manager.update()) {
+    if (weather_manager.getHumidityShutdown()) {
+      Serial.println("HUMIDITY SHUTDOWN");
+      delay(10000);
+    }
+    if (weather_manager.getTempShutdown()) {
+      Serial.println("TEMPERATURE SHUTDOWN");
+      delay(10000);
+    }
+    weather_manager.print();
+  }
+
+  ///////////////// Actuator Outputs //////////////////
+  // updateSolenoids(); // turns off all solenoids which have
+  // been activated using triggerSolenoid
+  // for (int i = 0; i < NUM_MOTORS; i++) {
+  //   if (active_motors[i] == true) {
+  //     updateHBridge(i);
+  //   }
+  // }
+  // playback_engine.update();
+  /*
+    if (last_playback_tmr > 1000) {
+    Serial.println("playing rhythm through playback_engine");
+    playback_engine.playRhythm(rhythm_bank.getRandomRhythm());
+    last_playback_tmr = 0;
+    }
+    for (int i = 0; i < 3; i++) {
+    bells[i].update();
+    }
+  */
+
+  ///////////////// Audio Analysis ////////////////////
+  fft_manager.update();
+  fc.update();
+  ///////////////// Passive Visual Feedback ///////////
+  updateFeedbackLEDs();
 }

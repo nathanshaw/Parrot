@@ -81,6 +81,14 @@
 #define ONE_HOUR    3600000
 #define ONE_DAY     86400000
 
+void updateMinMax(double val, double &_min, double &_max) {
+  if (val > _max){
+    _max = val;
+  } else if (val < _min) {
+    _min = val;
+  }
+}
+
 /*
   //updateLoopLength();
   #if PRINT_LOOP_LENGTH == true

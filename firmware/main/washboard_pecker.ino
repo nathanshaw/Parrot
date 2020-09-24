@@ -1,52 +1,52 @@
 ///////////////////////// WASHBOARD / PECKER MODULE /////////////////////////////
 // 0 is off, 1 is forward, -1 is backward
-/*
-int8_t hbridge_state = 0;
-uint16_t hbridge_forward_remaining = 0;
-uint16_t hbridge_backward_remaining = 0;
+int8_t hbridge_state[NUM_MOTORS] = {0,0,0};
+uint16_t hbridge_forward_remaining[NUM_MOTORS] = {0,0,0};
+uint16_t hbridge_backward_remaining[NUM_MOTORS] = {0,0,0};
 
-elapsedMillis hbridge_update;
+elapsedMillis hbridge_update[NUM_MOTORS];
+
 #define H_BRIDGE_F_SPEED 250
 #define H_BRIDGE_R_SPEED -200
 
-void shakeWashboard(uint16_t len) {
-  hbridge_forward_remaining = len * 0.7;
-  hbridge_backward_remaining = len * 0.3;
+// TODO - need to add fault checking as well....
+void shakeWashboard(int w, uint16_t len) {
+  hbridge_forward_remaining[w] = len * 0.7;
+  hbridge_backward_remaining[w] = len * 0.3;
   Serial.print("Shake washboard: ");
-  Serial.print(hbridge_forward_remaining);
+  Serial.print(hbridge_forward_remaining[w]);
   Serial.print(" - ");
-  Serial.println(hbridge_backward_remaining);
-  hbridge_state = 1;
-  hbridge_update = 0;
-  motor.enableDrivers();
-  updateHBridge();
+  Serial.println(hbridge_backward_remaining[w]);
+  hbridge_state[w] = 1;
+  hbridge_update[w] = 0;
+  motors[w].enableDrivers();
+  updateHBridge(w);
 }
 
-void updateHBridge() {
-  if (hbridge_state == 0) {
-    dbPrintln("wb state == 0", 3);
+void updateHBridge(int w) {
+  if (hbridge_state[w] == 0) {
+    // dbPrintln("wb state == 0", 3);
     return;
-  } else if (hbridge_state == 1) {
-    dbPrintln("wb state = 1", 3);
-    if (hbridge_update > hbridge_forward_remaining) {
-      hbridge_state = -1;
-      hbridge_update = 0;
+  } else if (hbridge_state[w] == 1) {
+    // dbPrintln("wb state = 1", 3);
+    if (hbridge_update[w] > hbridge_forward_remaining[w]) {
+      hbridge_state[w] = -1;
+      hbridge_update[w] = 0;
     } else {
-      motor.setM1Speed(H_BRIDGE_F_SPEED);  
-      dbPrintln("forward", 2);
+      motors[w].setM1Speed(H_BRIDGE_F_SPEED);  
+      // dbPrintln("forward", 2);
     }
-  } else if (hbridge_state == -1) {
-    dbPrintln("wb state = -1", 3);
-    if (hbridge_update > hbridge_backward_remaining) {
-      hbridge_state = 0;
-      hbridge_update = 0;
-      motor.setM1Speed(0);
-      motor.disableDrivers();
+  } else if (hbridge_state[w] == -1) {
+    // dbPrintln("wb state = -1", 3);
+    if (hbridge_update[w] > hbridge_backward_remaining[w]) {
+      hbridge_state[w] = 0;
+      hbridge_update[w] = 0;
+      motors[w].setM1Speed(0);
+      motors[w].disableDrivers();
     }
     else {
-      dbPrintln("reverse", 2);
-      motor.setM1Speed(H_BRIDGE_R_SPEED);
+      // dbPrintln("reverse", 2);
+      motors[w].setM1Speed(H_BRIDGE_R_SPEED);
     }
   }
 }
-*/

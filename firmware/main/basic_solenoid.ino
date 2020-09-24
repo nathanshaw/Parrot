@@ -1,4 +1,13 @@
 
+// to keep track of if the different solenoid outputs are active or not
+bool sol_active[] = {false, false, false, false, false, false};
+unsigned long sol_timers[6];
+elapsedMillis last_sol_action[6];
+// time in ms in which the solenoids need to cool down between individual actuations
+#define SOL_COOLDOWN 10
+// the number of active solenoid channels, 4 for boards 1.1 & 1.0 6 for rev 2.0
+#define NUM_SOL_CHANNELS 4
+
 void triggerSolenoid(uint8_t num, uint16_t on_time) {
   // if the solenoid in question is not currently active
   if (sol_active[num] == false && last_sol_action[num] > SOL_COOLDOWN) {
