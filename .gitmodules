@@ -7,9 +7,6 @@
 [submodule "v2/firmware/parrot_main_test/PlaybackEngine"]
 	path = v2/firmware/parrot_main_test/PlaybackEngine
 	url = https://github.com/nathanshaw/PlaybackEngine
-[submodule "firmware/main/LuxManager"]
-	path = firmware/main/LuxManager
-	url = https://github.com/nathanshaw/LuxManager.git
 [submodule "firmware/main_simple/dual-max14870-motor-shield"]
 	path = firmware/main_simple/dual-max14870-motor-shield
 	url = https://github.com/pololu/dual-max14870-motor-shield.git

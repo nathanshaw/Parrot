@@ -10,8 +10,8 @@ void setup() {
   // put your setup code here, to run once:
 
   Wire.begin();
-  Serial.begin(9600);
-  delay(1000); // let serial console settle
+  Serial.begin(57600);
+  delay(5000); // let serial console settle
 
   if (sht.init()) {
       Serial.print("init(): success\n");
