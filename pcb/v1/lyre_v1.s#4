@@ -17534,7 +17534,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0.2032" drill="0.254">
+<class number="0" name="default" width="0.2032" drill="0.2032">
 <clearance class="0" value="0.1524"/>
 </class>
 <class number="1" name="12V_IN" width="1.016" drill="0.381">

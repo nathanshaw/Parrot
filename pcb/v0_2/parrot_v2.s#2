@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.4.1">
+<eagle version="9.5.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -9234,12 +9234,32 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <label x="-45.72" y="-12.7" size="1.778" layer="95"/>
 <pinref part="U$3" gate="G$1" pin="23/A9/T/PWM"/>
 </segment>
+<segment>
+<pinref part="MEMS_L" gate="G$1" pin="5"/>
+<wire x1="-78.74" y1="15.24" x2="-78.74" y2="7.62" width="0.1524" layer="91"/>
+<label x="-78.74" y="7.62" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="MEMS_R" gate="G$1" pin="5"/>
+<wire x1="-78.74" y1="-7.62" x2="-78.74" y2="-15.24" width="0.1524" layer="91"/>
+<label x="-78.74" y="-15.24" size="1.778" layer="95" rot="R90"/>
+</segment>
 </net>
 <net name="I2S_BCLK" class="0">
 <segment>
 <wire x1="-33.02" y1="22.86" x2="-45.72" y2="22.86" width="0.1524" layer="91"/>
 <label x="-45.72" y="22.86" size="1.778" layer="95"/>
 <pinref part="U$3" gate="G$1" pin="9/RX2/PWM"/>
+</segment>
+<segment>
+<pinref part="MEMS_R" gate="G$1" pin="3"/>
+<wire x1="-83.82" y1="-7.62" x2="-83.82" y2="-15.24" width="0.1524" layer="91"/>
+<label x="-83.82" y="-15.24" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="MEMS_L" gate="G$1" pin="3"/>
+<wire x1="-83.82" y1="15.24" x2="-83.82" y2="7.62" width="0.1524" layer="91"/>
+<label x="-83.82" y="7.62" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="MOT_SPEED" class="0">
@@ -9302,18 +9322,6 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <pinref part="REG_PWR" gate="G$1" pin="2"/>
 </segment>
 </net>
-<net name="LRCLK" class="0">
-<segment>
-<pinref part="MEMS_R" gate="G$1" pin="5"/>
-<wire x1="-78.74" y1="-7.62" x2="-78.74" y2="-15.24" width="0.1524" layer="91"/>
-<label x="-78.74" y="-15.24" size="1.778" layer="95" rot="R90"/>
-</segment>
-<segment>
-<pinref part="MEMS_L" gate="G$1" pin="5"/>
-<wire x1="-78.74" y1="15.24" x2="-78.74" y2="7.62" width="0.1524" layer="91"/>
-<label x="-78.74" y="7.62" size="1.778" layer="95" rot="R90"/>
-</segment>
-</net>
 <net name="I2S_DATA" class="0">
 <segment>
 <pinref part="MEMS_R" gate="G$1" pin="4"/>
@@ -9329,18 +9337,6 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <wire x1="-33.02" y1="12.7" x2="-45.72" y2="12.7" width="0.1524" layer="91"/>
 <label x="-45.72" y="12.7" size="1.778" layer="95"/>
 <pinref part="U$3" gate="G$1" pin="13/SCK/LED"/>
-</segment>
-</net>
-<net name="BCLK" class="0">
-<segment>
-<pinref part="MEMS_R" gate="G$1" pin="3"/>
-<wire x1="-83.82" y1="-7.62" x2="-83.82" y2="-15.24" width="0.1524" layer="91"/>
-<label x="-83.82" y="-15.24" size="1.778" layer="95" rot="R90"/>
-</segment>
-<segment>
-<pinref part="MEMS_L" gate="G$1" pin="3"/>
-<wire x1="-83.82" y1="15.24" x2="-83.82" y2="7.62" width="0.1524" layer="91"/>
-<label x="-83.82" y="7.62" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="N$1" class="0">

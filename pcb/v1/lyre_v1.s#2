@@ -17637,9 +17637,9 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="NEO_1B" library="con-jst-ph" deviceset="B3B-PH-K" device="" value=""/>
 <part name="GND23" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY8" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="5V" device=""/>
-<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1"/>
-<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1"/>
-<part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1"/>
+<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1" value="1 mF"/>
+<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1" value="1 mF"/>
+<part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="UD-10X10" package3d_urn="urn:adsk.eagle:package:23469/1" value="1 mF"/>
 <part name="GND7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND21" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND24" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>

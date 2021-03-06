@@ -9306,9 +9306,9 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <pinref part="U$1" gate="G$1" pin="DIR"/>
 </segment>
 <segment>
-<wire x1="-33.02" y1="-5.08" x2="-45.72" y2="-5.08" width="0.1524" layer="91"/>
-<label x="-45.72" y="-5.08" size="1.778" layer="95"/>
-<pinref part="U$3" gate="G$1" pin="20/A6/PWM"/>
+<wire x1="-33.02" y1="-7.62" x2="-45.72" y2="-7.62" width="0.1524" layer="91"/>
+<label x="-45.72" y="-7.62" size="1.778" layer="95"/>
+<pinref part="U$3" gate="G$1" pin="21/A7/PWM"/>
 </segment>
 </net>
 <net name="MOT_COAST" class="0">
@@ -9318,9 +9318,9 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <pinref part="U$1" gate="G$1" pin="EN"/>
 </segment>
 <segment>
-<wire x1="-33.02" y1="-7.62" x2="-45.72" y2="-7.62" width="0.1524" layer="91"/>
-<label x="-45.72" y="-7.62" size="1.778" layer="95"/>
-<pinref part="U$3" gate="G$1" pin="21/A7/PWM"/>
+<wire x1="-33.02" y1="-5.08" x2="-45.72" y2="-5.08" width="0.1524" layer="91"/>
+<label x="-45.72" y="-5.08" size="1.778" layer="95"/>
+<pinref part="U$3" gate="G$1" pin="20/A6/PWM"/>
 </segment>
 </net>
 <net name="N$30" class="0">
@@ -9457,13 +9457,6 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <label x="-45.72" y="15.24" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="AME" class="0">
-<segment>
-<wire x1="-33.02" y1="25.4" x2="-45.72" y2="25.4" width="0.1524" layer="91"/>
-<label x="-45.72" y="25.4" size="1.778" layer="95"/>
-<pinref part="U$3" gate="G$1" pin="8/TX3"/>
-</segment>
-</net>
 <net name="MOT_FAULT" class="0">
 <segment>
 <pinref part="U$1" gate="G$1" pin="FAULT"/>
@@ -9486,9 +9479,9 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <junction x="-58.42" y="109.22"/>
 </segment>
 <segment>
-<wire x1="-33.02" y1="33.02" x2="-45.72" y2="33.02" width="0.1524" layer="91"/>
-<label x="-45.72" y="33.02" size="1.778" layer="95"/>
-<pinref part="U$3" gate="G$1" pin="5/PWM"/>
+<wire x1="-33.02" y1="25.4" x2="-45.72" y2="25.4" width="0.1524" layer="91"/>
+<label x="-45.72" y="25.4" size="1.778" layer="95"/>
+<pinref part="U$3" gate="G$1" pin="8/TX3"/>
 </segment>
 </net>
 <net name="NEO_PIX3" class="0">
@@ -9533,6 +9526,11 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <pinref part="TP9" gate="G$1" pin="1"/>
 <wire x1="-30.48" y1="109.22" x2="-33.02" y2="109.22" width="0.1524" layer="91"/>
 <junction x="-30.48" y="109.22"/>
+</segment>
+<segment>
+<wire x1="-33.02" y1="33.02" x2="-45.72" y2="33.02" width="0.1524" layer="91"/>
+<label x="-45.72" y="33.02" size="1.778" layer="95"/>
+<pinref part="U$3" gate="G$1" pin="5/PWM"/>
 </segment>
 </net>
 </nets>

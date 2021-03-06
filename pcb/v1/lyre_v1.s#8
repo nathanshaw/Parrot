@@ -168,6 +168,7 @@
 <layer number="255" name="routoute" color="7" fill="1" visible="yes" active="yes"/>
 </layers>
 <schematic xreflabel="%F%N/%S.%C%R" xrefpart="/%S.%C%R">
+<fusionteam huburn="a.cGVyc29uYWw6dWUyYWRjZTVi" projecturn="a.cGVyc29uYWw6dWUyYWRjZTViIzIwMTkwNTIyMTk1MjY2MTAx" folderUrn="urn:adsk.wipprod:fs.folder:co.QdMf91s6Q9GiabbX8u2nzw" urn="urn:adsk.wipprod:dm.lineage:2bMx8YPaT9yZoNOxCMsnHw"  versionUrn="urn:adsk.wipprod:fs.file:vf.2bMx8YPaT9yZoNOxCMsnHw?version=2" camFileUrn="" camFileVersionUrn="" lastpublishedchangeguid="f4d5b194-b1d3-93ef-a1bb-cfbae0ab2c48"/>
 <libraries>
 <library name="supply1" urn="urn:adsk.eagle:library:371">
 <description>&lt;b&gt;Supply Symbols&lt;/b&gt;&lt;p&gt;
@@ -17866,17 +17867,17 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0.2032" drill="0.508">
-<clearance class="0" value="0.2032"/>
+<class number="0" name="default" width="0.2032" drill="0.254">
+<clearance class="0" value="0.1524"/>
 </class>
-<class number="1" name="12V_IN" width="1.016" drill="0.762">
-<clearance class="1" value="0.3048"/>
+<class number="1" name="12V_IN" width="1.016" drill="0.381">
+<clearance class="1" value="0.2032"/>
 </class>
-<class number="2" name="3.3V" width="0.3048" drill="0.508">
-<clearance class="2" value="0.254"/>
+<class number="2" name="3.3V" width="0.3048" drill="0.3048">
+<clearance class="2" value="0.2032"/>
 </class>
-<class number="3" name="5V" width="0.7874" drill="0.508">
-<clearance class="3" value="0.381"/>
+<class number="3" name="5V" width="0.7874" drill="0.3048">
+<clearance class="3" value="0.2032"/>
 </class>
 </classes>
 <parts>

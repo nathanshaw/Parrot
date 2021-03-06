@@ -1,5 +1,6 @@
 ///////////////////////// WASHBOARD / PECKER MODULE /////////////////////////////
 // 0 is off, 1 is forward, -1 is backward
+#if HV_MAJOR ==1
 int8_t hbridge_state[NUM_MOTORS] = {0,0,0};
 uint16_t hbridge_forward_remaining[NUM_MOTORS] = {0,0,0};
 uint16_t hbridge_backward_remaining[NUM_MOTORS] = {0,0,0};
@@ -50,3 +51,4 @@ void updateHBridge(int w) {
     }
   }
 }
+#endif // HV_MAJOR == 1

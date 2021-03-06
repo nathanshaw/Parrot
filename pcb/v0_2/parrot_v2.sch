@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.5.1">
+<eagle version="9.6.2">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
@@ -9474,7 +9474,7 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <parts>
 <part name="NEO_PIX3" library="con-jst-ph" deviceset="B3B-PH-K" device="" value=""/>
 <part name="GND10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="FRAME2" library="SparkFun-Aesthetics" library_urn="urn:adsk.eagle:library:507" deviceset="FRAME-A4L" device="">
+<part name="FRAME2" library="SparkFun-Aesthetics" library_urn="urn:adsk.eagle:library:507" deviceset="FRAME-A4L" device="" value="Explorator v0.2">
 <attribute name="CNAME" value=""/>
 <attribute name="CREVISION" value=""/>
 <attribute name="DESIGNER" value=""/>
@@ -9596,7 +9596,7 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <wire x1="-66.04" y1="33.02" x2="-99.06" y2="33.02" width="0.1524" layer="94"/>
 <text x="39.878" y="151.384" size="3.81" layer="94">I2C</text>
 <text x="-96.52" y="147.32" size="1.778" layer="94"></text>
-<wire x1="27.94" y1="60.96" x2="27.94" y2="-22.86" width="0.1524" layer="94"/>
+<wire x1="27.94" y1="15.24" x2="27.94" y2="-22.86" width="0.1524" layer="94"/>
 <text x="154.94" y="33.02" size="3.81" layer="94" rot="R180">Solenoids and Motors</text>
 <text x="-38.862" y="54.864" size="3.81" layer="94">Teensy 3.2 + Audio Board</text>
 <text x="-86.36" y="27.94" size="3.81" layer="94">Mics</text>
@@ -9604,33 +9604,26 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <wire x1="-66.04" y1="33.02" x2="-66.04" y2="-22.86" width="0.1524" layer="94"/>
 <wire x1="-2.54" y1="93.98" x2="-2.54" y2="60.96" width="0.1524" layer="94"/>
 <wire x1="-2.54" y1="60.96" x2="-53.34" y2="60.96" width="0.1524" layer="94"/>
-<wire x1="27.94" y1="60.96" x2="-2.54" y2="60.96" width="0.1524" layer="94"/>
 <text x="-50.038" y="151.638" size="3.81" layer="94">Power</text>
-<text x="241.3" y="0" size="1.778" layer="91" rot="R90">Make sure this cap is placed with correct polarity</text>
 <wire x1="-53.34" y1="93.98" x2="-2.54" y2="93.98" width="0.1524" layer="94"/>
-<wire x1="88.9" y1="60.96" x2="27.94" y2="60.96" width="0.1524" layer="94"/>
-<wire x1="88.9" y1="60.96" x2="89.154" y2="-1.524" width="0.1524" layer="94"/>
-<text x="34.798" y="54.864" size="3.81" layer="94">Temp/Humidity Sensor</text>
+<wire x1="88.9" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="94"/>
+<wire x1="88.9" y1="15.24" x2="89.154" y2="-1.524" width="0.1524" layer="94"/>
+<text x="32.258" y="6.604" size="3.81" layer="94">Temp/Humidity Sensor</text>
 <text x="-43.942" y="89.154" size="3.81" layer="94">CTRL</text>
 <text x="12.7" y="-15.24" size="1.778" layer="91" rot="R90">add fault for the motor driver</text>
 <text x="15.24" y="-15.24" size="1.778" layer="91" rot="R90">LDRs are not connected!!!!!!</text>
-<text x="236.22" y="152.4" size="2.5146" layer="91" rot="R270">Fix Silkscreen side for the Solenoids and Motor Outputs</text>
-<text x="218.44" y="71.12" size="2.5146" layer="91" rot="R90">Add Test Ponts for I2C, I2S, and other things...</text>
-<text x="213.36" y="58.42" size="2.5146" layer="91" rot="R90">Add some cable cut-out slots on outside where no traces are</text>
-<text x="208.28" y="81.28" size="2.5146" layer="91" rot="R90">Add one more connector for I2C</text>
-<text x="203.2" y="60.96" size="2.5146" layer="91" rot="R90">Switch side that the NeoPixels connectors/silkscreen is on</text>
-<text x="198.12" y="68.58" size="2.5146" layer="91" rot="R90">input selector for 5v and 12v on solenoid outputs</text>
-<text x="233.68" y="91.44" size="1.778" layer="91" rot="R90">Add second NeoP channel</text>
-<text x="228.6" y="53.34" size="1.778" layer="91" rot="R90">(test two neoP channels, along with the motor driver and audio all running at same time...)</text>
-<text x="223.52" y="96.52" size="1.778" layer="91" rot="R90">add Status LED</text>
-<text x="193.04" y="86.36" size="1.778" layer="91" rot="R90">replace 0.3 with 1206 components</text>
-<text x="187.96" y="86.36" size="1.778" layer="91" rot="R90">replace all test points with 0.1" pads</text>
 <text x="17.78" y="-17.78" size="1.778" layer="91" rot="R90">Add decoupling caps for teensy</text>
 <wire x1="-2.54" y1="93.98" x2="-2.54" y2="124.46" width="0.1524" layer="94"/>
 <wire x1="-99.06" y1="124.46" x2="-2.54" y2="124.46" width="0.1524" layer="94"/>
 <wire x1="-2.54" y1="124.46" x2="-2.54" y2="157.48" width="0.1524" layer="94"/>
-<text x="182.88" y="63.5" size="1.778" layer="94" rot="R90">Test is the MEMS microphones will work onboard or if they need to be off-board</text>
-<text x="-106.68" y="-22.86" size="1.778" layer="94" rot="R90">Perhaps replace the JST ph connectors for the microphone boards to the onboard footprints</text>
+<wire x1="88.9" y1="15.24" x2="88.9" y2="35.56" width="0.1524" layer="94"/>
+<wire x1="88.9" y1="35.56" x2="88.9" y2="36.322" width="0.1524" layer="94"/>
+<wire x1="88.9" y1="36.322" x2="174.244" y2="36.322" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="60.96" x2="88.9" y2="60.96" width="0.1524" layer="94"/>
+<wire x1="88.9" y1="60.96" x2="88.9" y2="36.322" width="0.1524" layer="94"/>
+<text x="81.28" y="-5.08" size="2.54" layer="94">Explorator v0.2</text>
+<text x="81.28" y="-10.16" size="2.54" layer="94">Nathan Daniel Villicana-Shaw</text>
+<text x="81.28" y="-15.24" size="2.54" layer="94">2019</text>
 </plain>
 <instances>
 <instance part="NEO_PIX3" gate="G$1" x="-71.12" y="109.22" smashed="yes">
@@ -9641,9 +9634,6 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <attribute name="VALUE" x="-81.28" y="99.06" size="1.778" layer="96"/>
 </instance>
 <instance part="FRAME2" gate="G$1" x="-99.06" y="-21.59" smashed="yes">
-<attribute name="DRAWING_NAME" x="82.55" y="-10.16" size="2.54" layer="94" font="vector"/>
-<attribute name="LAST_DATE_TIME" x="82.55" y="-15.24" size="2.286" layer="94" font="vector"/>
-<attribute name="SHEET" x="96.52" y="-20.32" size="2.54" layer="94" font="vector"/>
 <attribute name="CREVISION" x="135.86" y="-20.42" size="2.54" layer="94" font="vector"/>
 <attribute name="CNAME" x="82.55" y="-5.08" size="2.54" layer="94" font="vector"/>
 <attribute name="DESIGNER" x="127.2" y="-15.24" size="2.54" layer="94" font="vector"/>
@@ -9833,19 +9823,18 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <instance part="MOT" gate="-2" x="149.86" y="17.78" smashed="yes">
 <attribute name="NAME" x="152.4" y="17.018" size="1.524" layer="95"/>
 </instance>
-<instance part="U1" gate="G$1" x="60.96" y="33.02" smashed="yes">
-<attribute name="NAME" x="53.594" y="38.608" size="1.778" layer="95" font="vector" ratio="15"/>
-<attribute name="VALUE" x="53.34" y="25.4" size="1.778" layer="96" font="vector" ratio="15"/>
+<instance part="U1" gate="G$1" x="54.356" y="-8.128" smashed="yes">
+<attribute name="NAME" x="46.99" y="-2.54" size="1.778" layer="95" font="vector" ratio="15"/>
+<attribute name="VALUE" x="46.736" y="-15.748" size="1.778" layer="96" font="vector" ratio="15"/>
 </instance>
-<instance part="GND21" gate="1" x="45.72" y="22.86" smashed="yes">
-<attribute name="VALUE" x="45.72" y="22.606" size="1.778" layer="96" align="top-center"/>
+<instance part="GND21" gate="1" x="39.116" y="-18.288" smashed="yes">
+<attribute name="VALUE" x="39.116" y="-18.542" size="1.778" layer="96" align="top-center"/>
 </instance>
-<instance part="SUPPLY20" gate="G$1" x="45.72" y="40.64" smashed="yes">
-<attribute name="VALUE" x="45.72" y="43.434" size="1.778" layer="96" align="bottom-center"/>
+<instance part="SUPPLY20" gate="G$1" x="39.116" y="-0.508" smashed="yes">
+<attribute name="VALUE" x="39.116" y="2.286" size="1.778" layer="96" align="bottom-center"/>
 </instance>
 <instance part="PWR_REG" gate="G$1" x="-88.9" y="142.24" smashed="yes">
-<attribute name="NAME" x="-88.9" y="152.4" size="2.032" layer="95" font="vector" align="center"/>
-<attribute name="VALUE" x="-88.9" y="129.54" size="2.032" layer="95" font="vector" align="center"/>
+<attribute name="NAME" x="-88.9" y="154.94" size="2.032" layer="95" font="vector" align="center"/>
 </instance>
 <instance part="GND16" gate="1" x="-7.62" y="139.7" smashed="yes">
 <attribute name="VALUE" x="-10.16" y="137.16" size="1.778" layer="96"/>
@@ -9859,7 +9848,7 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 </instance>
 <instance part="TP4" gate="G$1" x="-93.98" y="48.26" smashed="yes" rot="R90">
 <attribute name="NAME" x="-92.456" y="44.45" size="1.778" layer="95" font="vector" rot="R180"/>
-<attribute name="VALUE" x="-96.266" y="47.498" size="1.778" layer="96" font="vector" rot="R90"/>
+<attribute name="VALUE" x="-88.646" y="42.418" size="1.778" layer="96" font="vector" rot="R90"/>
 </instance>
 <instance part="TP5" gate="G$1" x="-68.58" y="43.18" smashed="yes" rot="R90">
 <attribute name="NAME" x="-66.802" y="39.37" size="1.778" layer="95" font="vector" rot="R180"/>
@@ -10002,9 +9991,9 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 <attribute name="NAME" x="-68.326" y="129.286" size="1.778" layer="95" font="vector"/>
 <attribute name="VALUE" x="-69.342" y="132.334" size="1.778" layer="96" font="vector" rot="R90"/>
 </instance>
-<instance part="C5" gate="G$1" x="38.1" y="33.02" smashed="yes">
-<attribute name="NAME" x="39.116" y="33.655" size="1.778" layer="95"/>
-<attribute name="VALUE" x="39.116" y="28.829" size="1.778" layer="96"/>
+<instance part="C5" gate="G$1" x="31.496" y="-8.128" smashed="yes">
+<attribute name="NAME" x="32.512" y="-7.493" size="1.778" layer="95"/>
+<attribute name="VALUE" x="32.512" y="-12.319" size="1.778" layer="96"/>
 </instance>
 <instance part="C4" gate="G$1" x="23.876" y="41.91" smashed="yes" rot="R270">
 <attribute name="NAME" x="19.05" y="42.164" size="1.27" layer="95" ratio="10" rot="R270"/>
@@ -10076,11 +10065,11 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="VDD"/>
-<wire x1="50.8" y1="35.56" x2="45.72" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="45.72" y1="35.56" x2="45.72" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="44.196" y1="-5.588" x2="39.116" y2="-5.588" width="0.1524" layer="91"/>
+<wire x1="39.116" y1="-5.588" x2="39.116" y2="-0.508" width="0.1524" layer="91"/>
 <pinref part="SUPPLY20" gate="G$1" pin="3.3V"/>
-<wire x1="45.72" y1="35.56" x2="38.1" y2="35.56" width="0.1524" layer="91"/>
-<junction x="45.72" y="35.56"/>
+<wire x1="39.116" y1="-5.588" x2="31.496" y2="-5.588" width="0.1524" layer="91"/>
+<junction x="39.116" y="-5.588"/>
 <pinref part="C5" gate="G$1" pin="1"/>
 </segment>
 <segment>
@@ -10119,8 +10108,8 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="SDA"/>
-<wire x1="71.12" y1="30.48" x2="78.74" y2="30.48" width="0.1524" layer="91"/>
-<label x="78.74" y="30.48" size="1.778" layer="95"/>
+<wire x1="64.516" y1="-10.668" x2="72.136" y2="-10.668" width="0.1524" layer="91"/>
+<label x="72.136" y="-10.668" size="1.778" layer="95"/>
 </segment>
 <segment>
 <wire x1="-33.02" y1="0" x2="-45.72" y2="0" width="0.1524" layer="91"/>
@@ -10142,8 +10131,8 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="SCL"/>
-<wire x1="71.12" y1="35.56" x2="78.74" y2="35.56" width="0.1524" layer="91"/>
-<label x="78.74" y="35.56" size="1.778" layer="95"/>
+<wire x1="64.516" y1="-5.588" x2="72.136" y2="-5.588" width="0.1524" layer="91"/>
+<label x="72.136" y="-5.588" size="1.778" layer="95"/>
 </segment>
 <segment>
 <wire x1="-33.02" y1="-2.54" x2="-45.72" y2="-2.54" width="0.1524" layer="91"/>
@@ -10219,12 +10208,12 @@ Also note, the SNAP packages are for using a snappable style connector. We sell 
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="VSS"/>
-<wire x1="50.8" y1="30.48" x2="45.72" y2="30.48" width="0.1524" layer="91"/>
-<wire x1="45.72" y1="30.48" x2="45.72" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="44.196" y1="-10.668" x2="39.116" y2="-10.668" width="0.1524" layer="91"/>
+<wire x1="39.116" y1="-10.668" x2="39.116" y2="-13.208" width="0.1524" layer="91"/>
 <pinref part="GND21" gate="1" pin="GND"/>
-<wire x1="45.72" y1="27.94" x2="45.72" y2="25.4" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="27.94" x2="45.72" y2="27.94" width="0.1524" layer="91"/>
-<junction x="45.72" y="27.94"/>
+<wire x1="39.116" y1="-13.208" x2="39.116" y2="-15.748" width="0.1524" layer="91"/>
+<wire x1="31.496" y1="-13.208" x2="39.116" y2="-13.208" width="0.1524" layer="91"/>
+<junction x="39.116" y="-13.208"/>
 <pinref part="C5" gate="G$1" pin="2"/>
 </segment>
 <segment>

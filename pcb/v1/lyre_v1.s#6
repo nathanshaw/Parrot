@@ -4067,7 +4067,7 @@ Metric Code Size 5664</description>
 <wire x1="7.62" y1="-6.35" x2="-7.62" y2="-6.35" width="0.127" layer="21"/>
 <wire x1="-7.62" y1="-6.35" x2="-7.62" y2="6.35" width="0.127" layer="21"/>
 </package>
-<package name="DIOAD1138W86L465D235B" urn="urn:adsk.eagle:footprint:19144171/1">
+<package name="DIOAD1138W86L465D235B" urn="urn:adsk.eagle:footprint:19144171/1" locally_modified="yes">
 <description>Axial Diode, 11.38 mm pitch, 4.65 mm body length, 2.35 mm body diameter
 &lt;p&gt;Axial Diode package with 11.38 mm pitch (lead spacing), 0.86 mm lead diameter, 4.65 mm body length and 2.35 mm body diameter&lt;/p&gt;</description>
 <wire x1="-2.6" y1="1.35" x2="-2.6" y2="-1.35" width="0.12" layer="21"/>
@@ -4081,8 +4081,8 @@ Metric Code Size 5664</description>
 <wire x1="-2.6" y1="-1.35" x2="-2.6" y2="1.35" width="0.12" layer="51"/>
 <wire x1="-2.6" y1="1.35" x2="2.6" y2="1.35" width="0.12" layer="51"/>
 <wire x1="2.6" y1="1.35" x2="2.6" y2="-1.35" width="0.12" layer="51"/>
-<pad name="1" x="-5.69" y="0" drill="1.06" diameter="1.66"/>
-<pad name="2" x="5.69" y="0" drill="1.06" diameter="1.66"/>
+<pad name="1" x="-5.69" y="0" drill="1.06" diameter="1.9304"/>
+<pad name="2" x="5.69" y="0" drill="1.06" diameter="1.9304"/>
 <text x="0" y="1.985" size="1.27" layer="25" align="bottom-center">&gt;NAME</text>
 <text x="0" y="-1.985" size="1.27" layer="27" align="top-center">&gt;VALUE</text>
 </package>

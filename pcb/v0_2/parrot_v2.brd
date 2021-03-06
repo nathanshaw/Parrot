@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.5.1">
+<eagle version="9.6.2">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.25" unitdist="mil" unit="mil" style="dots" multiple="1" display="yes" altdistance="1" altunitdist="mil" altunit="mil"/>
@@ -23,17 +23,17 @@
 <layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
 <layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="yes"/>
 <layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="yes"/>
 <layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="yes"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
@@ -47,9 +47,9 @@
 <layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
-<layer number="40" name="bKeepout" color="1" fill="11" visible="yes" active="yes"/>
+<layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
-<layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
+<layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
@@ -59,7 +59,7 @@
 <layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
 <layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="yes"/>
 <layer number="53" name="tGND_GNDA" color="7" fill="1" visible="no" active="no"/>
 <layer number="54" name="bGND_GNDA" color="7" fill="1" visible="no" active="no"/>
 <layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
@@ -168,11 +168,11 @@
 <layer number="255" name="routoute" color="7" fill="1" visible="no" active="yes"/>
 </layers>
 <board>
-<fusionsync huburn="a.cGVyc29uYWw6dWUyYWRjZTVi" projecturn="a.cGVyc29uYWw6dWUyYWRjZTViIzIwMTkwNTE2MTk0MjIzODUx" f3durn="urn:adsk.wipprod:dm.lineage:NFP_iIeHQGms001mJm5pbg" pcbguid="0bd6a69f-3b44-4c63-bd4f-b1bf585d3a3a" lastpulledtime="" lastsyncedchangeguid="00897717-f45c-77c2-13a5-944085ebe09b"/>
+<fusionsync huburn="a.cGVyc29uYWw6dWUyYWRjZTVi" projecturn="a.cGVyc29uYWw6dWUyYWRjZTViIzIwMTkwNTE2MTk0MjIzODUx" f3durn="urn:adsk.wipprod:dm.lineage:NFP_iIeHQGms001mJm5pbg" pcbguid="0bd6a69f-3b44-4c63-bd4f-b1bf585d3a3a" lastpulledtime="" lastsyncedchangeguid="00897717-f45c-77c2-13a5-944085ebe09b" latestrevisionid="" lastsyncedrevisionid="" lastboardhashguid="" lastpushedtime="" linktopcb3d="false"/>
 <plain>
 <circle x="0" y="0" radius="45" width="0.0762" layer="20"/>
-<text x="22.19325" y="-33.3121" size="1.778" layer="25" rot="R180">Lyre Genus
-Mainboard v2.0</text>
+<text x="22.19325" y="-33.3121" size="1.778" layer="25" rot="R180">Explorator
+Mainboard v0.2</text>
 <text x="18.3388" y="-38.0746" size="1.016" layer="25" rot="R180">designed by
 Nathan Villicana-Shaw</text>
 <text x="6.63575" y="-41.53535" size="1.016" layer="25" rot="R180">2019</text>
@@ -22381,10 +22381,13 @@ design rules under a new name.</description>
 <contactref element="U1" pad="4"/>
 <contactref element="U1" pad="5"/>
 <polygon width="0.8128" layer="16">
-<vertex x="-45.72" y="45.72"/>
-<vertex x="45.72" y="45.72"/>
-<vertex x="45.72" y="-32.385"/>
-<vertex x="-45.72" y="-32.385"/>
+<vertex x="19.628740625" y="-32.385"/>
+<vertex x="-21.6310875" y="-32.385" curve="-90"/>
+<vertex x="-45.72" y="-8.2960875"/>
+<vertex x="-45.72" y="-0.347059375" curve="-90"/>
+<vertex x="0.347059375" y="45.72" curve="-90"/>
+<vertex x="45.72" y="0.347059375"/>
+<vertex x="45.72" y="-6.293740625" curve="-90"/>
 </polygon>
 <contactref element="PWR_REG" pad="GND"/>
 <contactref element="U$1" pad="GND2"/>
@@ -22413,11 +22416,12 @@ design rules under a new name.</description>
 <polygon width="0.8128" layer="1">
 <vertex x="46.0248" y="6.096"/>
 <vertex x="46.1264" y="6.1976"/>
-<vertex x="46.1264" y="-21.4376"/>
-<vertex x="34.7472" y="-32.8168"/>
-<vertex x="-33.4264" y="-32.8168"/>
-<vertex x="-44.8056" y="-21.4376"/>
-<vertex x="-45.4152" y="-20.828"/>
+<vertex x="46.1264" y="-13.754328125" curve="-45"/>
+<vertex x="40.69350625" y="-26.87049375" curve="-45.000009"/>
+<vertex x="26.337853125" y="-32.8168"/>
+<vertex x="-24.080734375" y="-32.8168" curve="-45"/>
+<vertex x="-40.034784375" y="-26.208415625" curve="-45.21622"/>
+<vertex x="-45.38659375" y="-13.2187375"/>
 <vertex x="-45.3136" y="6.1976"/>
 </polygon>
 <via x="27.7368" y="-18.9992" extent="1-16" drill="0.9"/>
@@ -22622,13 +22626,11 @@ design rules under a new name.</description>
 <wire x1="-25.654" y1="-10.2616" x2="-25.677" y2="-10.2386" width="1.524" layer="1"/>
 <wire x1="-25.677" y1="-10.2386" x2="-25.677" y2="-10.2362" width="1.524" layer="1"/>
 <wire x1="-19.7892" y1="-0.79" x2="-19.7892" y2="-5.9716" width="1.524" layer="1"/>
-<polygon width="0.8128" layer="1">
-<vertex x="-45.5422" y="9.8806" curve="90"/>
-<vertex x="-45.5168" y="9.8552"/>
-</polygon>
 <wire x1="-25.6794" y1="-10.2362" x2="-25.654" y2="-10.2616" width="1.27" layer="1"/>
 <polygon width="0.762" layer="1">
-<vertex x="-45.72" y="45.72"/>
+<vertex x="46.0248" y="9.8552" curve="90.036474"/>
+<vertex x="10.46474375" y="45.595696875"/>
+<vertex x="-12.293528125" y="45.646046875" curve="90.300423"/>
 <vertex x="-45.6184" y="12.2936"/>
 <vertex x="-23.4696" y="12.2936" curve="-90"/>
 <vertex x="-10.5664" y="25.1968"/>
@@ -22638,8 +22640,6 @@ design rules under a new name.</description>
 <vertex x="22.7584" y="12.5984" curve="90"/>
 <vertex x="25.7048" y="9.652"/>
 <vertex x="45.8216" y="9.652" curve="90"/>
-<vertex x="46.0248" y="9.8552"/>
-<vertex x="46.1264" y="45.5168"/>
 </polygon>
 </signal>
 <signal name="5V">

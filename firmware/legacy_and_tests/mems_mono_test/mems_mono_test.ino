@@ -1,4 +1,4 @@
-/* Stereo peak meter example, assumes Audio adapter but just uses terminal so no more parts required.
+ /* Stereo peak meter example, assumes Audio adapter but just uses terminal so no more parts required.
 
   This example code is in the public domain
 

@@ -46,9 +46,9 @@
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////// Software Configurations /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-#define SV_MAJOR           0
-#define SV_MINOR           3
-#define SV_SUBVERSION      0
+// #define SV_MAJOR           0
+// #define SV_MINOR           3
+// #define SV_SUBVERSION      0
 /*
 // version 0.3.0 has lots of changes under the hood concerning how the classees are treated. For the v3 units the temp
    and humidity sensor and the WeatherManager was addded. There is a huge problem with the program having a memory leak

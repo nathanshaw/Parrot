@@ -29,36 +29,8 @@
 #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
-// a higher level the more debug printing occurs
-#define DEBUG 0
-#define TEST_SOLENOIDS 0
-#define TEST_MOTOR 0
-#define TEST_NEOP 0
-// todo make this bring up the stereo test...?
-#define TEST_MICS 1
-// todo implement this
-#define TEST_TEMP_HUMIDITY 0
-#define TEST_LDRS 0
-
-#define PRINT_PEAK_VALS 0
-
-// should the program datalog?
-#define DATALOG 0
-#define PRINT_EEPROM_ON_BOOT 0
-
-#define lux_min_reading_delay (1000 * 15)
-#define lux_max_reading_delay (1000 * 60 * 3)
 // lux managers to keep track of the VEML readings
 LuxManager lux_manager = LuxManager(lux_min_reading_delay, lux_max_reading_delay, LUX_MAPPING_SCHEMA);
-// LuxManager lux_manager = LuxManager(lux_min_reading_delay, lux_max_reading_delay, (String)"Front", &neos[0]);
-
-//////////////////////////////////////////////////////////////////////////
-///////////////////  Solenoids/actuators  ////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-const int s_pins[] = {SOL1_PIN, SOL2_PIN, SOL3_PIN, SOL4_PIN, SOL5_PIN, SOL6_PIN};
-uint16_t sol_on_time[] = {30, 30, 30, 30, 30, 30};
-bool sol_state[] = {false, false, false, false, false, false}; // is the solenoid on or off
 
 void testSolenoids(unsigned int len) {
   elapsedMillis t = 0;
@@ -237,7 +209,7 @@ AudioConnection          patchCord11(input_amp, 0, usb_output, 1);
 double peak_val = 0.0;
 double last_peak = 0.0;
 
-FFTManager1024 fft_manager = FFTManager1024("Input FFT");
+FFTManager1024 fft_manager = FFTManager1024(FFT_LOWEST_BIN, FFT_HIGHEST_BIN, "Input FFT");
 FeatureCollector fc = FeatureCollector("ALL");
 
 Rhythm rhythm[10] = {
@@ -259,7 +231,7 @@ PlaybackEngine playback_engine = PlaybackEngine();
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// User Controls ////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-UIManager uimanager = UIManager(UI_POLLING_RATE, POT_PLAY, P_UIMANAGER);
+UIManager uimanager = UIManager(UI_POLLING_RATE, P_UIMANAGER);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Rhythm detection stuff ///////////////////////////////////
@@ -313,21 +285,6 @@ bool but_test[4];
 float pot_test[4];
 
 void setup() {
-  Serial.begin(57600);
-  delay(3000);// let the system settle
-  printMajorDivide("starting setup loop");
-  /////////////// User Controls ////////////////////////////////////////////
-  uimanager.addBut(BUT1_PIN, BUT1_REVERSE, BUT1_PULLUP, &but_test[0], BUT1_NAME);
-  uimanager.addBut(BUT2_PIN, BUT2_REVERSE, BUT2_PULLUP, &but_test[1], BUT2_NAME);
-  uimanager.addBut(BUT3_PIN, BUT3_REVERSE, BUT3_PULLUP, &but_test[2], BUT3_NAME);
-  uimanager.addBut(BUT4_PIN, BUT4_REVERSE, BUT4_PULLUP, &but_test[3], BUT4_NAME);
-
-  uimanager.addPot(POT1_PIN, POT1_REVERSE, &pot_test[0], POT1_NAME);
-  uimanager.addPot(POT2_PIN, POT2_REVERSE, &pot_test[1], POT2_NAME);
-
-  uimanager.setup();
-  uimanager.printAll();
-
   /////////////// Solenoid Outputs /////////////////////////////////////////
   pinMode(s_pins[0], OUTPUT);
   pinMode(s_pins[1], OUTPUT);
@@ -335,15 +292,42 @@ void setup() {
   pinMode(s_pins[3], OUTPUT);
   pinMode(s_pins[4], OUTPUT);
   pinMode(s_pins[5], OUTPUT);
-  digitalWrite(s_pins[0], LOW);
-  digitalWrite(s_pins[1], LOW);
-  digitalWrite(s_pins[2], LOW);
-  digitalWrite(s_pins[3], LOW);
-  digitalWrite(s_pins[4], LOW);
-  digitalWrite(s_pins[5], LOW);
+  digitalWrite(s_pins[0], HIGH);
+  digitalWrite(s_pins[1], HIGH);
+  digitalWrite(s_pins[2], HIGH);
+  digitalWrite(s_pins[3], HIGH);
+  digitalWrite(s_pins[4], HIGH);
+  digitalWrite(s_pins[5], HIGH);
   Serial.println("Finished setting solenoid pins to outputs");
+  Serial.begin(57600);
+  testSolenoids(3000);// let the system settle
+  printMajorDivide("starting setup loop");
 
-  ///////////////////// Lux Manager
+  ///////////////////// NeoPixel Strips /////////////////////////////////////
+  printMinorDivide();
+  Serial.println("Starting the LED strips");
+  leds[0].begin();
+  leds[1].begin();
+  leds[2].begin();
+  for (int i = 0; i < 3; i++) {
+    neos[i].colorWipe(80, 10, 70, 0.25);
+  }
+  Serial.println("Finished starting the LED strips");
+  printMinorDivide();
+
+  /////////////// User Controls ////////////////////////////////////////////
+  uimanager.addBut(BUT1_PIN, BUT1_REVERSE, BUT1_PULLUP, &but_test[0], BUT1_NAME);
+  uimanager.addBut(BUT2_PIN, BUT2_REVERSE, BUT2_PULLUP, &but_test[1], BUT2_NAME);
+  uimanager.addBut(BUT3_PIN, BUT3_REVERSE, BUT3_PULLUP, &but_test[2], BUT3_NAME);
+  uimanager.addBut(BUT4_PIN, BUT4_REVERSE, BUT4_PULLUP, &but_test[3], BUT4_NAME);
+
+  uimanager.addPot(POT1_PIN, POT1_REVERSE, POT1_PLAY, &pot_test[0], POT1_NAME);
+  uimanager.addPot(POT2_PIN, POT2_REVERSE, POT2_PLAY, &pot_test[1], POT2_NAME);
+
+  uimanager.setup();
+  uimanager.printAll();
+
+  ///////////////////// Lux Manager /////////////////////////////////
   printMinorDivide();
   Serial.println("Starting LuxManager");
   lux_manager.setLuxThresholds(LOW_LUX_THRESHOLD, MID_LUX_THRESHOLD, HIGH_LUX_THRESHOLD, EXTREME_LUX_THRESHOLD);
@@ -353,21 +337,14 @@ void setup() {
   lux_manager.linkNeoGroup(&neos[2]);
   lux_manager.start7700Sensor(VEML7700_GAIN_1, VEML7700_IT_25MS); // todo add this to config_adv? todo
   delay(200);
-
   lux_manager.calibrate(3000, true);
   Serial.println("Finished starting LuxManager");
-  printMinorDivide();
 
-  ///////////////////// NeoPixel Strips
-  printMinorDivide();
-  Serial.println("Starting the LED strips");
-  leds[0].begin();
-  leds[1].begin();
-  leds[2].begin();
-  Serial.println("Finished starting the LED strips");
-  printMinorDivide();
   ///////////////////// temp and humidity sensor //
+  printMinorDivide();
+  Serial.println("Starting WeatherManager");
   weather_manager.init();
+  Serial.println("Finished starting WeatherManager");
 
   ////////////////////// Audio
   printMinorDivide();
@@ -377,77 +354,14 @@ void setup() {
   uint32_t lpf = 14000;
   uint32_t hpf = 200;
   double q = 0.8;
-  input_amp.gain(30.0);
+  input_amp.gain(60.0);
 
   biquad.setLowpass(0, lpf, q);
   biquad.setLowpass(1, lpf, q);
   biquad.setHighpass(2, hpf, q);
   biquad.setHighpass(3, hpf, q);
 
-  // freq, length, onset time, velocity
-  /*
-    rhythm[0].addNote(100.0, 200, 0, 1.0);
-    rhythm[0].addNote(500.0, 250, 0, 1.0);
-    rhythm[0].addNote(1000.0, 1000, 0, 1.0);
-    rhythm[0].addNote(100.0, 1000, 1500, 1.0);
-    rhythm[0].addNote(100.0, 200, 300, 1.0);
-    rhythm[0].addNote(100.0, 200, 300, 1.0);
-    rhythm[0].addNote(100.0, 200, 300, 1.0);
-  */
-
-  rhythm[0].addNote(500.0, 0, 100, 1.0);
-  rhythm[0].addNote(500.0, 0, 100, 1.0);
-  rhythm[0].addNote(500.0, 0, 150, 1.0);
-  rhythm[0].addNote(1000.0, 0, 100, 1.0);
-  rhythm[0].addNote(1000.0, 0, 100, 1.0);
-  rhythm[0].addNote(1000.0, 0, 150, 1.0);
-
-  rhythm[0].addNote(100.0, 0, 100, 1.0);
-  rhythm[0].addNote(500.0, 0, 100, 1.0);
-  rhythm[0].addNote(1000.0, 0, 150, 1.0);
-  rhythm[0].addNote(100.0, 0, 100, 1.0);
-  rhythm[0].addNote(500.0, 0, 100, 1.0);
-  rhythm[0].addNote(1000.0, 0, 150, 1.0);
-
-  rhythm[0].addNote(100.0, 0, 200, 1.0);
-  rhythm[0].addNote(500.0, 0, 70, 1.0);
-  rhythm[0].addNote(1000.0, 0, 90, 1.0);
-  rhythm[0].addNote(100.0, 0, 60, 1.0);
-  rhythm[0].addNote(500.0, 0, 150, 1.0);
-  rhythm[0].addNote(1000.0, 0, 100, 1.0);
-
-  rhythm[1].addNote(50.0, 500, 0, 1.05);
-  rhythm[1].addNote(150.0, 500, 500, 1.01);
-  rhythm[1].addNote(250.0, 600, 1000, 1.15);
-  rhythm[1].addNote(550.0, 600, 1500, 1.20);
-  rhythm[1].addNote(450.0, 500, 2000, 1.20);
-  rhythm[1].addNote(1550.0, 400, 2500, 1.20);
-  rhythm[1].addNote(1650.0, 300, 3000, 1.20);
-
-  rhythm[2].addNote(50.0, 400, 0, 1.35);
-  rhythm[2].addNote(150.0, 300, 400, 1.31);
-  rhythm[2].addNote(250.0, 300, 800, 1.35);
-  rhythm[2].addNote(1350.0, 400, 1200, 1.30);
-  rhythm[2].addNote(450.0, 300, 2000, 1.30);
-  rhythm[2].addNote(550.0, 500, 2400, 1.30);
-  rhythm[2].addNote(1650.0, 200, 2600, 1.30);
-
-  rhythm[3].addNote(150.0, 0, 0, 1.35);
-  rhythm[3].addNote(150.0, 0, 400, 1.31);
-  rhythm[3].addNote(250.0, 0, 600, 1.35);
-  rhythm[3].addNote(1350.0, 0, 700, 1.30);
-  rhythm[3].addNote(450.0, 0, 800, 1.30);
-  rhythm[3].addNote(550.0, 0, 500, 1.30);
-  rhythm[3].addNote(1650.0, 0, 1000, 1.30);
-
-  rhythm_bank.addRhythm(& rhythm[0]);
-  // rhythm_bank.addRhythm(& rhythm[1]);
-  // rhythm_bank.addRhythm(& rhythm[2]);
-  // rhythm_bank.addRhythm(& rhythm[3]);
-
-  playback_engine.linkMechanism(& bells[0]);
-  playback_engine.linkMechanism(& bells[1]);
-  playback_engine.linkMechanism(& bells[2]);
+  configurePlaybackEngine();
 
   fft_manager.linkFFT(&fft);
   fft_manager.setCalculateCent(true);
@@ -460,7 +374,71 @@ void setup() {
   printMinorDivide();
   delay(3000);
   Serial.println("Finished setup Loop");
+  for (int i = 0; i < 3; i++) {
+    neos[i].colorWipe(0, 120, 30, 0.25);
+  }
   printMinorDivide();
+}
+
+void configurePlaybackEngine() {
+  // freq, length, onset delay (since last note), velocity
+  rhythm[0].addNote(500.0,  40, 0,    0.6);
+  rhythm[0].addNote(500.0,  40, 1000, 0.8);
+  rhythm[0].addNote(500.0,  30, 1500, 1.0);
+  rhythm[0].addNote(1000.0, 30, 1000, 1.0);
+  rhythm[0].addNote(1000.0, 20, 1000, 1.0);
+  rhythm[0].addNote(1000.0, 50, 1500, 1.0);
+
+  rhythm[0].addNote(100.0,  30, 1000, 1.0);
+  rhythm[0].addNote(500.0,  40, 1000, 1.0);
+  rhythm[0].addNote(1000.0, 30, 1500, 1.0);
+  rhythm[0].addNote(100.0,  20, 1000, 1.0);
+  rhythm[0].addNote(500.0,  40, 1000, 1.0);
+  rhythm[0].addNote(1000.0, 30, 1500, 1.0);
+
+  rhythm[0].addNote(100.0,  40, 200, 1.0);
+  rhythm[0].addNote(500.0,  30, 70,  1.0);
+  rhythm[0].addNote(1000.0, 40, 90,  1.0);
+  rhythm[0].addNote(100.0,  40, 60,  1.0);
+  rhythm[0].addNote(500.0,  30, 150, 1.0);
+  rhythm[0].addNote(1000.0, 30, 100, 1.0);
+
+  rhythm[1].addNote(50.0,   50, 0,    1.05);
+  rhythm[1].addNote(150.0,  50, 500,  1.01);
+  rhythm[1].addNote(250.0,  60, 1000, 1.15);
+  rhythm[1].addNote(550.0,  60, 1500, 1.20);
+  rhythm[1].addNote(450.0,  50, 2000, 1.20);
+  rhythm[1].addNote(1550.0, 40, 2500, 1.20);
+  rhythm[1].addNote(1650.0, 30, 3000, 1.20);
+
+  rhythm[2].addNote(50.0,   40, 0,    1.35);
+  rhythm[2].addNote(150.0,  30, 400,  1.31);
+  rhythm[2].addNote(250.0,  30, 800,  1.35);
+  rhythm[2].addNote(1350.0, 40, 1200, 1.30);
+  rhythm[2].addNote(450.0,  30, 2000, 1.30);
+  rhythm[2].addNote(550.0,  50, 2400, 1.30);
+  rhythm[2].addNote(1650.0, 20, 2600, 1.30);
+
+  rhythm[3].addNote(150.0,  40, 0,    1.35);
+  rhythm[3].addNote(150.0,  50, 400,  1.31);
+  rhythm[3].addNote(250.0,  60, 600,  1.35);
+  rhythm[3].addNote(1350.0, 40, 700,  1.30);
+  rhythm[3].addNote(450.0,  40, 800,  1.30);
+  rhythm[3].addNote(550.0,  50, 500,  1.30);
+  rhythm[3].addNote(1650.0, 40, 1000, 1.30);
+
+  rhythm_bank.addRhythm(& rhythm[0]);
+  rhythm_bank.addRhythm(& rhythm[1]);
+  rhythm_bank.addRhythm(& rhythm[2]);
+  rhythm_bank.addRhythm(& rhythm[3]);
+
+  playback_engine.linkMechanism(& bells[0]);
+  playback_engine.linkMechanism(& bells[1]);
+  playback_engine.linkMechanism(& bells[2]);
+
+  playback_engine.linkNeoGroup(& neos[0]);
+  playback_engine.linkNeoGroup(& neos[1]);
+  playback_engine.linkNeoGroup(& neos[2]);
 }
 
 elapsedMillis last_playback_tmr;
@@ -619,7 +597,12 @@ void updateFeedbackLEDs() {
     red = (uint8_t)((double)red * current_brightness);
     green = (uint8_t)((double)green * current_brightness);
     blue = (uint8_t)((double)blue * current_brightness);
-
+    Serial.print("rgb:\t");
+    Serial.print(red);
+    Serial.print("\t");
+    Serial.print(green);
+    Serial.print("\t");
+    Serial.println(blue);
     for (int i = 0; i < NUM_NEOP_MANAGERS; i++) {
       neos[i].colorWipe(red, green, blue, 1.0);
     }
@@ -627,13 +610,16 @@ void updateFeedbackLEDs() {
   }
 }
 
+double ACTUATION_DELAY = 0.0;
+
 void loop() {
   ///////////////// Ambient Lighting //////////////////
-  if (lux_manager.update()) {
-    // print the updated
-    lux_manager.print();
+  if (lux_manager.getActive() == true) {
+    if (lux_manager.update()) {
+      // print the updated
+      lux_manager.print();
+    }
   }
-
   ///////////////// User Controls /////////////////////
   uimanager.update();
   // uimanager.printAll();
@@ -652,24 +638,27 @@ void loop() {
   }
 
   ///////////////// Actuator Outputs //////////////////
-  // updateSolenoids(); // turns off all solenoids which have
+#if HV_MAJOR == 0
+  updateSolenoids(); // turns off all solenoids which have
   // been activated using triggerSolenoid
   // for (int i = 0; i < NUM_MOTORS; i++) {
   //   if (active_motors[i] == true) {
   //     updateHBridge(i);
   //   }
   // }
-  // playback_engine.update();
-  /*
-    if (last_playback_tmr > 1000) {
+  playback_engine.update();
+  ACTUATION_DELAY = (30000) + ((weather_manager.getTemperature() + weather_manager.getHumidity()) * lux_manager.getGlobalLux());
+  if (last_playback_tmr > ACTUATION_DELAY) {
+    Serial.print("actuation_delay: ");
+    Serial.println(ACTUATION_DELAY);
     Serial.println("playing rhythm through playback_engine");
     playback_engine.playRhythm(rhythm_bank.getRandomRhythm());
     last_playback_tmr = 0;
-    }
-    for (int i = 0; i < 3; i++) {
+  }
+  for (int i = 0; i < 3; i++) {
     bells[i].update();
-    }
-  */
+  }
+#endif // HV_MAJOR == 0
 
   ///////////////// Audio Analysis ////////////////////
   fft_manager.update();

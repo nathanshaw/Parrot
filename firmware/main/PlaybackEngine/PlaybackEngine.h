@@ -3,6 +3,7 @@
 
 #include "Rhythm.h"
 #include "../Mechanisms/Mechanisms.h"
+#include <NeopixelManager.h>
 
 class PlaybackEngine {
     public:
@@ -10,17 +11,30 @@ class PlaybackEngine {
       void playRhythm(Rhythm * r);
       void update();
       void linkMechanism(BellMechanism * m);
+      void linkNeoGroup(NeoGroup * n);
       // void addSolenoidMechanism(uint8_t act, uint8_t damp);
+      
     private:
       BellMechanism * mechanisms[3];
+      NeoGroup * neos[3];
       uint8_t num_mechanisms = 0;
+      uint8_t num_neos = 0;
       bool playback_active = false;
       Rhythm * rhythm;
       elapsedMillis last_onset;
+
+      uint8_t red = 200;
+      uint8_t green = 100;
+      uint8_t blue = 255;
 };
 
 PlaybackEngine::PlaybackEngine(){
 
+}
+
+void PlaybackEngine::linkNeoGroup(NeoGroup *n) {
+    neos[num_neos] = n;
+    num_neos++;
 }
 
 void PlaybackEngine::linkMechanism(BellMechanism * m) {
@@ -43,6 +57,9 @@ void PlaybackEngine::update() {
             return;
         }
         if (last_onset > rhythm->getCurrentOnset()) {
+            for (int n = 0; n < num_neos; n++) {
+                neos[n]->colorWipe(red, green, blue, 1.0);
+            }
             // TODO - need to get the information from the rhythm and set it up
             double target_f = rhythm->getFreq();
             double distance = 20000.0;
@@ -67,6 +84,10 @@ void PlaybackEngine::update() {
                 playback_active = false;
             }
             last_onset = 0;
+        } else if (last_onset > 100) {
+            for (int n = 0; n < num_neos; n++) {
+                neos[n]->colorWipe(0, 0, 0, 1.0);
+            }
         }
     }
 }
