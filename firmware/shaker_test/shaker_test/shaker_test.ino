@@ -11,6 +11,22 @@
 #include "SHTSensor.h"
 #include "MAX14870Motors.h"
 #include "Encoder.h"
+#include <Audio.h>
+#include <SPI.h>
+#include <SerialFlash.h>
+
+#define P_COLOR true
+
+///////////// Audio //////////////
+AudioInputI2S            i2s1;           //xy=474,316
+AudioFilterBiquad        HP_Filter;        //xy=629,307
+AudioAnalyzePeak         Peak;          //xy=843,265
+AudioAnalyzeRMS          RMS;           //xy=843,297
+AudioAnalyzeFFT1024      FFT;      //xy=843,329
+AudioConnection          patchCord1(i2s1, 0, HP_Filter, 0);
+AudioConnection          patchCord2(HP_Filter, Peak);
+AudioConnection          patchCord3(HP_Filter, RMS);
+AudioConnection          patchCord4(HP_Filter, FFT);
 
 // staging strikes
 
@@ -236,6 +252,73 @@ void shakeEvent(int num) {
     delay(random(10, 100));
   }
 }
+
+elapsedmillis last_led_update_tmr;
+long led_refresh_rate = 10;
+
+void updateFeedbackLEDs(FFTManager1024 *_fft_manager) {
+  // the brightness of the LEDs should mirror the peak gathered from the environment
+  // a local min/max which scales periodically should be implemented just like with the Moth
+  // a MAX_RMS brightness should be used to determine what the max brightness of the feedback is
+  // the LEDs should be updated 30x a second
+
+  // calculate the target color ///////////////////////////////////////
+  if (last_led_update_tmr > led_refresh_rate) {
+    double target_color = 0.0;
+    double target_brightness = 0.0;
+    uint8_t red, green, blue;
+
+    if (COLOR_FEATURE == SPECTRAL_CENTROID) {
+      target_color = calculateColorFromCentroid(_fft_manager);
+      dprint(P_COLOR, "target color: ");
+      dprintln(P_COLOR, target_color);
+      last_color = current_color;
+      current_color = (target_color * 0.2) + (last_color * 0.8);// * COLOR_LP_LEVEL);
+
+      // calculate the preliminary rgb values /////////////////////////////
+      red = ((1.0 - current_color) * RED_LOW) + (current_color * RED_HIGH);
+      green = ((1.0 - current_color) * GREEN_LOW) + (current_color * GREEN_HIGH);
+      blue = ((1.0 - current_color) * BLUE_LOW) + (current_color * BLUE_HIGH);
+    } else if (COLOR_FEATURE == SPLIT_BAND) {
+      /* Should return a number between 0.0 and 1.0 */
+      // Serial.println("about to calculate color based off split-band approach : ");
+      // delay(4000);
+      double green_d  = _fft_manager->getFFTRangeByFreq(50, 400); // 3 octaves in each band
+      double blue_d = _fft_manager->getFFTRangeByFreq(400, 3200);
+      double red_d = _fft_manager->getFFTRangeByFreq(3200, 12800);
+      // Serial.println("finished getting the energy amount from the fft manager : ");
+      // delay(4000);
+      red = (uint8_t)((double)MAX_BRIGHTNESS * (red_d / (red_d + green_d + blue_d)));
+      green = (uint8_t)((double)MAX_BRIGHTNESS * (green_d / (red_d + green_d + blue_d)));
+      blue = (uint8_t)((double)MAX_BRIGHTNESS * (blue_d / (red_d + green_d + blue_d)));
+    }
+
+    // calculate the target brightness ///////////////////////////////////
+    target_brightness = calculateFeedbackBrightness(_fft_manager);
+    /////////////////////////// Apply user brightness scaler ////////////////////////
+    if (USER_BS_ACTIVE > 0) {
+      target_brightness = target_brightness * user_brightness_scaler;
+    }
+
+    last_brightness = current_brightness;
+    current_brightness = (target_brightness * 0.8) + (current_brightness * 0.2);
+
+    // calculate the actual values to be sent to the strips
+    // red = (uint8_t)((double)red);
+    // green = (uint8_t)((double)green);
+    // blue = (uint8_t)((double)blue);
+    if (P_COLOR == true) {
+      Serial.print("rgb:\t");
+      Serial.print(red);
+      Serial.print("\t");
+      Serial.print(green);
+      Serial.print("\t");
+      Serial.println(blue);
+    }
+    last_led_update_tmr = 0;
+  }
+}
+
 
 void loop() {
   // put your main code here, to run repeatedly:
